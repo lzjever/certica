@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "certica"
+version = "1.0.0"
+description = "A user-friendly CA certificate generation tool for local development and testing"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Metarigin", email = "dev@metarigin.com"}
+]
+keywords = ["ca", "certificate", "ssl", "tls", "openssl", "development", "testing"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security :: Cryptography",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Systems Administration",
+]
+
+dependencies = [
+    "click>=7.0.0",
+    "rich>=10.0.0",
+    "questionary>=1.10.0",
+]
+
+[project.scripts]
+certica = "certica.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/metarigin/certica"
+Documentation = "https://github.com/metarigin/certica/blob/main/README.md"
+Repository = "https://github.com/metarigin/certica"
+
+[tool.setuptools]
+packages = ["certica"]
+
+[tool.setuptools.package-data]
+# Templates are stored in output/templates/ at runtime, not in the package
+
