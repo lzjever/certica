@@ -46,8 +46,19 @@ class CAManager:
         ca_key_path = ca_subdir / f"{ca_name}.key.pem"
         ca_cert_path = ca_subdir / f"{ca_name}.cert.pem"
 
-        if ca_key_path.exists() or ca_cert_path.exists():
+        # Only consider CA as existing if both key and cert exist
+        # This handles the case where previous creation was interrupted
+        if ca_key_path.exists() and ca_cert_path.exists():
             raise FileExistsError(f"CA {ca_name} already exists")
+        
+        # Clean up partial files from previous interrupted creation
+        if ca_key_path.exists() and not ca_cert_path.exists():
+            ca_key_path.unlink()
+        if ca_cert_path.exists() and not ca_key_path.exists():
+            ca_cert_path.unlink()
+        # Remove empty directory if both files are gone
+        if ca_subdir.exists() and not any(ca_subdir.iterdir()):
+            ca_subdir.rmdir()
 
         # Create temporary config file
         with tempfile.NamedTemporaryFile(mode="w", suffix=".cnf", delete=False) as f:
