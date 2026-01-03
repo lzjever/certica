@@ -20,6 +20,14 @@ Certica is a user-friendly CA certificate generation tool for local development 
       Overview and key concepts of Certica.
 
    .. grid-item-card::
+      :link: introduction_cn
+      :link-type: doc
+      
+      **介绍 (中文)**
+      
+      Certica 概述和核心概念（中文版）。
+
+   .. grid-item-card::
       :link: quickstart
       :link-type: doc
       
@@ -65,6 +73,7 @@ Certica is a user-friendly CA certificate generation tool for local development 
    :hidden:
 
    introduction
+   introduction_cn
    quickstart
    user_guide/index
    api_reference/index

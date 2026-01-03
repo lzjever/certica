@@ -22,7 +22,7 @@ Translation files are JSON files with a flat key-value structure. Keys use dot n
 
 ```json
 {
-  "ui.menu.title": "🔒 CA Certificate Tool",
+  "ui.menu.title": "🔒 CERTICA — CERTs In a Click, Always.",
   "ui.menu.select_operation": "Select operation:",
   "cli.create_ca.success": "✓ Root CA created successfully!",
   "system.verify.installing": "  Verifying installation..."

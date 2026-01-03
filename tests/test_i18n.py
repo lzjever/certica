@@ -34,7 +34,7 @@ def test_get_supported_languages():
 def test_translation():
     """Test translation function"""
     set_language("en")
-    assert t("ui.menu.title") == "🔒 CA Certificate Tool"
+    assert t("ui.menu.title") == "🔒 CERTICA — CERTs In a Click, Always."
 
     set_language("zh")
     assert t("ui.menu.title") == "🔒 CA证书工具"

@@ -430,11 +430,13 @@ class CAUITool:
     def _manage_cas(self):
         """Manage CA certificates - view details or delete"""
         while True:
-            self._clear_and_show_header("🔑 管理根CA证书")
+            self._clear_and_show_header(t("ui.manage_cas.title"))
 
             cas = self.ca_manager.list_cas()
             if not cas:
-                self._show_result_panel("⚠️  提示", "没有找到根CA证书", success=False)
+                self._show_result_panel(
+                    t("ui.manage_cas.no_cas"), t("ui.manage_cas.no_cas_msg"), success=False
+                )
                 self._wait_for_continue()
                 return
 
@@ -473,7 +475,7 @@ class CAUITool:
                         questionary.Choice(t("ui.manage_cas.action_back"), value="back"),
                     ],
                     instruction=self._get_select_instruction(),
-                ).ask()
+                )
 
                 if action is None or action == "back":
                     continue
@@ -488,27 +490,30 @@ class CAUITool:
 
     def _show_ca_details(self, ca: Dict[str, str]):
         """Show detailed information about a CA certificate"""
-        self._clear_and_show_header(f"📄 根CA证书详情: {ca['name']}")
+        self._clear_and_show_header(t("ui.manage_cas.details.title", ca_name=ca["name"]))
 
         info = self.ca_manager.get_ca_info(ca["cert"])
 
         # 显示基本信息
         table = Table(box=box.ROUNDED, show_header=False, show_edge=False)
-        table.add_column("属性", style="cyan", width=20)
-        table.add_column("值", style="green")
+        table.add_column(t("ui.manage_cas.details.attribute"), style="cyan", width=20)
+        table.add_column(t("ui.manage_cas.details.value"), style="green")
 
-        table.add_row("CA名称", f"🔑 {ca['name']}")
-        table.add_row("密钥路径", self._format_path(ca["key"]))
-        table.add_row("证书路径", self._format_path(ca["cert"]))
+        table.add_row(t("ui.manage_cas.details.ca_name"), f"🔑 {ca['name']}")
+        table.add_row(t("ui.manage_cas.details.key_path"), self._format_path(ca["key"]))
+        table.add_row(t("ui.manage_cas.details.cert_path"), self._format_path(ca["cert"]))
 
         self.console.print(table)
         self.console.print()
 
         # 显示证书详细信息
-        self.console.print(
+        cert_info_text = info.get("info", t("ui.manage_cas.details.cert_info_error"))
+        # 创建一个临时 Console 实例，禁用 emoji 渲染，避免证书信息中的字符被误识别为 emoji
+        no_emoji_console = Console(emoji=False)
+        no_emoji_console.print(
             Panel(
-                info.get("info", "无法读取证书信息"),
-                title="[bold]证书详细信息[/bold]",
+                cert_info_text,
+                title=f"[bold]{t('ui.manage_cas.details.cert_info')}[/bold]",
                 border_style="blue",
             )
         )
@@ -517,48 +522,63 @@ class CAUITool:
 
     def _delete_ca(self, ca: Dict[str, str]):
         """Delete a CA certificate"""
-        self._clear_and_show_header(f"🗑️  删除根CA: {ca['name']}")
+        self._clear_and_show_header(t("ui.manage_cas.delete.title", ca_name=ca["name"]))
 
         # 检查是否有签发的证书
         certs = self.ca_manager.get_certs_by_ca(ca["name"])
         cert_count = len(certs)
 
-        warning_msg = f"⚠️  警告: 删除根CA '{ca['name']}' 将同时删除:\n"
-        warning_msg += "  • CA证书和密钥\n"
         if cert_count > 0:
-            warning_msg += f"  • {cert_count} 个已签发的证书\n"
-        warning_msg += "\n此操作不可恢复！"
+            warning_msg = t(
+                "ui.manage_cas.delete.warning", ca_name=ca["name"], cert_count=cert_count
+            )
+        else:
+            warning_msg = t("ui.manage_cas.delete.warning_no_certs", ca_name=ca["name"])
 
         self.console.print(
-            Panel(warning_msg, border_style="red", title="[bold red]确认删除[/bold red]")
+            Panel(warning_msg, border_style="red", title="[bold red]⚠️  Warning[/bold red]")
         )
         self.console.print()
 
-        confirm = self._safe_confirm(f"确定要删除根CA '{ca['name']}' 吗?", default=False)
+        confirm = self._safe_confirm(
+            t("ui.manage_cas.delete.confirm", ca_name=ca["name"]), default=False
+        )
 
         if not confirm:
-            self._show_result_panel("ℹ️  提示", "已取消删除操作", success=True)
+            self._show_result_panel(
+                t("ui.manage_cas.delete.cancelled"),
+                t("ui.manage_cas.delete.cancelled_msg"),
+                success=True,
+            )
             self._wait_for_continue()
             return
 
         if self.ca_manager.delete_ca(ca["name"]):
             self._show_result_panel(
-                "✅ 成功", f"根CA '{ca['name']}' 及其所有证书已删除", success=True
+                t("ui.manage_cas.delete.success"),
+                t("ui.manage_cas.delete.success_msg", ca_name=ca["name"]),
+                success=True,
             )
         else:
-            self._show_result_panel("❌ 错误", f"删除根CA '{ca['name']}' 失败", success=False)
+            self._show_result_panel(
+                t("ui.manage_cas.delete.error"),
+                t("ui.manage_cas.delete.error_msg", ca_name=ca["name"]),
+                success=False,
+            )
 
         self._wait_for_continue()
 
     def _manage_certificates(self):
         """Manage certificates - view details or delete"""
         while True:
-            self._clear_and_show_header("📜 管理已签发的证书")
+            self._clear_and_show_header(t("ui.manage_certs.title"))
 
             # First, select which CA to query
             cas = self.ca_manager.list_cas()
             if not cas:
-                self._show_result_panel("⚠️  提示", "没有找到根CA证书", success=False)
+                self._show_result_panel(
+                    t("ui.manage_cas.no_cas"), t("ui.manage_cas.no_cas_msg"), success=False
+                )
                 self._wait_for_continue()
                 return
 
@@ -570,7 +590,7 @@ class CAUITool:
             ca_choices = [
                 questionary.Choice(f"🔑 {ca['name']}", value=str(i)) for i, ca in enumerate(cas)
             ]
-            ca_choices.append(questionary.Choice("⬅️  返回主菜单", value="back"))
+            ca_choices.append(questionary.Choice(t("ui.manage_certs.back_to_main"), value="back"))
 
             ca_index_str = self._safe_select(
                 t("ui.manage_certs.select_ca"),
@@ -593,8 +613,8 @@ class CAUITool:
 
                 if not certs:
                     self._show_result_panel(
-                        "⚠️  提示",
-                        f"根CA '{selected_ca['name']}' 还没有签发任何证书\n\n💡 提示: 使用菜单选项 '📜 签发证书（服务器/客户端）' 来创建新证书",
+                        t("ui.manage_certs.no_certs"),
+                        t("ui.manage_certs.no_certs_msg", ca_name=selected_ca["name"]),
                         success=False,
                     )
                     self._wait_for_continue()
@@ -604,7 +624,7 @@ class CAUITool:
                 cert_choices = []
                 for cert in certs:
                     # Try to determine certificate type
-                    cert_type = "❓ 未知"
+                    cert_type = t("ui.manage_certs.cert_type_unknown")
                     try:
                         import subprocess
 
@@ -625,11 +645,11 @@ class CAUITool:
                         output = result.stdout.lower()
                         if "serverauth" in output or "server authentication" in output:
                             if "clientauth" in output or "client authentication" in output:
-                                cert_type = "🖥️  服务器/客户端"
+                                cert_type = t("ui.manage_certs.cert_type_both")
                             else:
-                                cert_type = "🖥️  服务器"
+                                cert_type = t("ui.manage_certs.cert_type_server")
                         elif "clientauth" in output or "client authentication" in output:
-                            cert_type = "👤 客户端"
+                            cert_type = t("ui.manage_certs.cert_type_client")
                     except Exception:
                         pass
 
@@ -639,7 +659,7 @@ class CAUITool:
                         )
                     )
 
-                cert_choices.append(questionary.Choice("⬅️  返回", value="back"))
+                cert_choices.append(questionary.Choice(t("ui.manage_certs.back"), value="back"))
 
                 cert_index_str = self._safe_select(
                     t("ui.manage_certs.select_cert", ca_name=selected_ca["name"]),
@@ -680,28 +700,31 @@ class CAUITool:
 
     def _show_cert_details(self, cert: Dict[str, str], ca_name: str):
         """Show detailed information about a certificate"""
-        self._clear_and_show_header(f"📄 证书详情: {cert['name']}")
+        self._clear_and_show_header(t("ui.manage_certs.details.title", cert_name=cert["name"]))
 
         info = self.cert_manager.get_certificate_info(cert["cert"])
 
         # 显示基本信息
         table = Table(box=box.ROUNDED, show_header=False, show_edge=False)
-        table.add_column("属性", style="cyan", width=20)
-        table.add_column("值", style="green")
+        table.add_column(t("ui.manage_certs.details.attribute"), style="cyan", width=20)
+        table.add_column(t("ui.manage_certs.details.value"), style="green")
 
-        table.add_row("证书名称", f"📜 {cert['name']}")
-        table.add_row("所属CA", f"🔑 {ca_name}")
-        table.add_row("密钥路径", self._format_path(cert["key"]))
-        table.add_row("证书路径", self._format_path(cert["cert"]))
+        table.add_row(t("ui.manage_certs.details.cert_name"), f"📜 {cert['name']}")
+        table.add_row(t("ui.manage_certs.details.ca_name"), f"🔑 {ca_name}")
+        table.add_row(t("ui.manage_certs.details.key_path"), self._format_path(cert["key"]))
+        table.add_row(t("ui.manage_certs.details.cert_path"), self._format_path(cert["cert"]))
 
         self.console.print(table)
         self.console.print()
 
         # 显示证书详细信息
-        self.console.print(
+        cert_info_text = info.get("info", t("ui.manage_certs.details.cert_info_error"))
+        # 创建一个临时 Console 实例，禁用 emoji 渲染，避免证书信息中的字符被误识别为 emoji
+        no_emoji_console = Console(emoji=False)
+        no_emoji_console.print(
             Panel(
-                info.get("info", "无法读取证书信息"),
-                title="[bold]证书详细信息[/bold]",
+                cert_info_text,
+                title=f"[bold]{t('ui.manage_certs.details.cert_info')}[/bold]",
                 border_style="blue",
             )
         )
@@ -710,35 +733,51 @@ class CAUITool:
 
     def _delete_certificate(self, cert: Dict[str, str], ca_name: str):
         """Delete a certificate"""
-        self._clear_and_show_header(f"🗑️  删除证书: {cert['name']}")
+        self._clear_and_show_header(t("ui.manage_certs.delete.title", cert_name=cert["name"]))
 
-        warning_msg = f"⚠️  警告: 删除证书 '{cert['name']}'\n"
-        warning_msg += "  • 证书和密钥将被永久删除\n"
-        warning_msg += "\n此操作不可恢复！"
+        warning_msg = t("ui.manage_certs.delete.warning", cert_name=cert["name"])
 
         self.console.print(
-            Panel(warning_msg, border_style="red", title="[bold red]确认删除[/bold red]")
+            Panel(
+                warning_msg,
+                border_style="red",
+                title=f"[bold red]{t('ui.manage_certs.delete.panel_title')}[/bold red]",
+            )
         )
         self.console.print()
 
-        confirm = self._safe_confirm(f"确定要删除证书 '{cert['name']}' 吗?", default=False)
+        confirm = self._safe_confirm(
+            t("ui.manage_certs.delete.confirm", cert_name=cert["name"]), default=False
+        )
 
         if not confirm:
-            self._show_result_panel("ℹ️  提示", "已取消删除操作", success=True)
+            self._show_result_panel(
+                t("ui.manage_certs.delete.cancelled"),
+                t("ui.manage_certs.delete.cancelled_msg"),
+                success=True,
+            )
             self._wait_for_continue()
             return
 
         if self.cert_manager.delete_certificate(ca_name, cert["name"]):
-            self._show_result_panel("✅ 成功", f"证书 '{cert['name']}' 已删除", success=True)
+            self._show_result_panel(
+                t("ui.manage_certs.delete.success"),
+                t("ui.manage_certs.delete.success_msg", cert_name=cert["name"]),
+                success=True,
+            )
         else:
-            self._show_result_panel("❌ 错误", f"删除证书 '{cert['name']}' 失败", success=False)
+            self._show_result_panel(
+                t("ui.manage_certs.delete.error"),
+                t("ui.manage_certs.delete.error_msg", cert_name=cert["name"]),
+                success=False,
+            )
 
         self._wait_for_continue()
 
     def _manage_templates(self):
         """Manage template files"""
         while True:
-            self._clear_and_show_header("📝 模板管理")
+            self._clear_and_show_header(t("ui.manage_templates.title"))
 
             # 使用方向键选择
             choice = self._safe_select(
@@ -767,30 +806,36 @@ class CAUITool:
 
     def _create_template(self):
         """Create a new template"""
-        self._clear_and_show_header("➕ 创建模板")
+        self._clear_and_show_header(t("ui.manage_templates.create.title"))
 
         self._show_input_hint()
-        template_name = self._safe_text_input("模板名称:")
+        template_name = self._safe_text_input(t("ui.manage_templates.create.name"))
         if not template_name:
             return
 
-        organization = self._safe_text_input("默认机构名称:", default="Development")
+        organization = self._safe_text_input(
+            t("ui.manage_templates.create.org"), default="Development"
+        )
         if organization is None:
             return
-        country = self._safe_text_input("默认国家代码:", default="CN")
+        country = self._safe_text_input(t("ui.manage_templates.create.country"), default="CN")
         if country is None:
             return
-        state = self._safe_text_input("默认省/州:", default="Beijing")
+        state = self._safe_text_input(t("ui.manage_templates.create.state"), default="Beijing")
         if state is None:
             return
-        city = self._safe_text_input("默认城市:", default="Beijing")
+        city = self._safe_text_input(t("ui.manage_templates.create.city"), default="Beijing")
         if city is None:
             return
 
-        validity_str = self._safe_text_input("默认有效期（天）:", default="365")
+        validity_str = self._safe_text_input(
+            t("ui.manage_templates.create.validity"), default="365"
+        )
         if validity_str is None:
             return
-        key_size_str = self._safe_text_input("默认密钥长度:", default="2048")
+        key_size_str = self._safe_text_input(
+            t("ui.manage_templates.create.key_size"), default="2048"
+        )
         if key_size_str is None:
             return
 
@@ -798,7 +843,9 @@ class CAUITool:
             validity = int(validity_str) if validity_str else 365
             key_size = int(key_size_str) if key_size_str else 2048
         except ValueError:
-            self._show_result_panel("❌ 错误", "无效的数值", success=False)
+            self._show_result_panel(
+                t("ui.install_cert.error"), t("ui.create_ca.error_invalid"), success=False
+            )
             self._wait_for_continue()
             return
 
@@ -806,45 +853,56 @@ class CAUITool:
             template_name, organization, country, state, city, validity, key_size
         )
 
-        content = f"""✓ 模板创建成功！
+        content = t(
+            "ui.manage_templates.create.success_content",
+            template_name=template_name,
+            template_path=self._format_path(path),
+            organization=organization,
+            validity=validity,
+            key_size=key_size,
+        )
 
-**模板名称:** {template_name}
-**模板路径:** {self._format_path(path)}
-**默认机构:** {organization}
-**默认有效期:** {validity} 天
-**默认密钥长度:** {key_size} 位"""
-
-        self._show_result_panel("✅ 成功", content, success=True)
+        self._show_result_panel(t("ui.install_cert.success"), content, success=True)
         self._wait_for_continue()
 
     def _list_templates(self):
         """List all templates"""
-        self._clear_and_show_header("📋 模板列表")
+        self._clear_and_show_header(t("ui.manage_templates.list.title"))
 
         templates = self.template_manager.list_templates()
         if not templates:
-            self._show_result_panel("⚠️  提示", "没有找到模板文件", success=False)
+            self._show_result_panel(
+                t("ui.manage_templates.list.no_templates"),
+                t("ui.manage_templates.list.no_templates_msg"),
+                success=False,
+            )
             self._wait_for_continue()
             return
 
         # 显示模板列表
         table = Table(box=box.ROUNDED, show_header=True, header_style="bold magenta")
-        table.add_column("模板名称", style="green")
+        table.add_column(t("ui.manage_templates.list.template_name"), style="green")
 
         for template in templates:
             table.add_row(f"📝 {template}")
 
         self.console.print(table)
-        self.console.print(f"\n[dim]共找到 {len(templates)} 个模板[/dim]")
+        self.console.print(
+            f"\n[dim]{t('ui.manage_templates.list.count', count=len(templates))}[/dim]"
+        )
         self._wait_for_continue()
 
     def _load_template(self):
         """Load a template"""
-        self._clear_and_show_header("📥 加载模板")
+        self._clear_and_show_header(t("ui.manage_templates.load.title"))
 
         templates = self.template_manager.list_templates()
         if not templates:
-            self._show_result_panel("⚠️  提示", "没有可用的模板", success=False)
+            self._show_result_panel(
+                t("ui.manage_templates.load.no_templates"),
+                t("ui.manage_templates.load.no_templates_msg"),
+                success=False,
+            )
             self._wait_for_continue()
             return
 
@@ -867,28 +925,39 @@ class CAUITool:
             if 0 <= index < len(templates):
                 self.template = self.template_manager.load_template(templates[index])
 
-                content = f"""✓ 模板加载成功！
+                content = t(
+                    "ui.manage_templates.load.success_content",
+                    template_name=templates[index],
+                    organization=self.template.get("organization", "N/A"),
+                    validity=self.template.get("default_validity_days", "N/A"),
+                    key_size=self.template.get("default_key_size", "N/A"),
+                )
 
-**模板名称:** {templates[index]}
-**默认机构:** {self.template.get('organization', 'N/A')}
-**默认有效期:** {self.template.get('default_validity_days', 'N/A')} 天
-**默认密钥长度:** {self.template.get('default_key_size', 'N/A')} 位"""
-
-                self._show_result_panel("✅ 成功", content, success=True)
+                self._show_result_panel(t("ui.install_cert.success"), content, success=True)
             else:
-                self._show_result_panel("❌ 错误", "无效的选择", success=False)
+                self._show_result_panel(
+                    t("ui.install_cert.error"),
+                    t("ui.manage_templates.load.error_invalid"),
+                    success=False,
+                )
         except ValueError:
-            self._show_result_panel("❌ 错误", "无效的输入", success=False)
+            self._show_result_panel(
+                t("ui.install_cert.error"), t("ui.manage_templates.load.error_input"), success=False
+            )
 
         self._wait_for_continue()
 
     def _delete_template(self):
         """Delete a template"""
-        self._clear_and_show_header("🗑️  删除模板")
+        self._clear_and_show_header(t("ui.manage_templates.delete.title"))
 
         templates = self.template_manager.list_templates()
         if not templates:
-            self._show_result_panel("⚠️  提示", "没有可用的模板", success=False)
+            self._show_result_panel(
+                t("ui.manage_templates.list.no_templates"),
+                t("ui.manage_templates.delete.no_templates_msg"),
+                success=False,
+            )
             self._wait_for_continue()
             return
 
@@ -911,27 +980,47 @@ class CAUITool:
             if 0 <= index < len(templates):
                 template_name = templates[index]
 
-                if self._safe_confirm(f"确认删除模板 '{template_name}'?", default=False):
+                if self._safe_confirm(
+                    t("ui.manage_templates.delete.confirm", template_name=template_name),
+                    default=False,
+                ):
                     if self.template_manager.delete_template(template_name):
                         self._show_result_panel(
-                            "✅ 成功", f"模板 '{template_name}' 已删除", success=True
+                            t("ui.install_cert.success"),
+                            t(
+                                "ui.manage_templates.delete.success_msg",
+                                template_name=template_name,
+                            ),
+                            success=True,
                         )
                     else:
-                        self._show_result_panel("❌ 错误", "删除失败", success=False)
+                        self._show_result_panel(
+                            t("ui.install_cert.error"),
+                            t("ui.manage_templates.delete.error_failed"),
+                            success=False,
+                        )
             else:
-                self._show_result_panel("❌ 错误", "无效的选择", success=False)
+                self._show_result_panel(
+                    t("ui.install_cert.error"),
+                    t("ui.manage_templates.load.error_invalid"),
+                    success=False,
+                )
         except ValueError:
-            self._show_result_panel("❌ 错误", "无效的输入", success=False)
+            self._show_result_panel(
+                t("ui.install_cert.error"), t("ui.manage_templates.load.error_input"), success=False
+            )
 
         self._wait_for_continue()
 
     def _install_certificate(self):
         """Install CA certificate to system"""
-        self._clear_and_show_header("🔧 安装CA证书到系统")
+        self._clear_and_show_header(t("ui.install_cert.title"))
 
         cas = self.ca_manager.list_cas()
         if not cas:
-            self._show_result_panel("⚠️  提示", "没有可用的CA证书", success=False)
+            self._show_result_panel(
+                t("ui.install_cert.no_cas"), t("ui.install_cert.no_cas_msg"), success=False
+            )
             self._wait_for_continue()
             return
 
@@ -954,65 +1043,82 @@ class CAUITool:
                 selected_ca = cas[ca_index]
 
                 if self._safe_confirm(
-                    f"确认安装CA '{selected_ca['name']}' 到系统?\n[注意: 需要sudo权限]",
+                    t("ui.install_cert.confirm", ca_name=selected_ca["name"]),
                     default=False,
                 ):
                     # Get sudo password
                     password = questionary.password(
-                        "请输入sudo密码:", instruction="(密码输入时不会显示)"
+                        t("ui.install_cert.password"),
+                        instruction=t("ui.install_cert.password_hint"),
                     ).ask()
 
                     if password is None:
-                        self._show_result_panel("ℹ️  提示", "已取消安装操作", success=True)
+                        self._show_result_panel(
+                            t("ui.install_cert.cancelled"),
+                            t("ui.install_cert.cancelled_msg"),
+                            success=True,
+                        )
                         self._wait_for_continue()
                         return
 
-                    self.console.print("\n[yellow]正在安装CA证书到系统...[/yellow]")
+                    self.console.print(f"\n[yellow]{t('ui.install_cert.installing')}[/yellow]")
                     if self.system_cert_manager.install_ca_cert(
                         selected_ca["cert"], selected_ca["name"], password
                     ):
                         self._show_result_panel(
-                            "✅ 成功", f"CA证书 '{selected_ca['name']}' 已安装到系统", success=True
+                            t("ui.install_cert.success"),
+                            t("ui.install_cert.success_msg", ca_name=selected_ca["name"]),
+                            success=True,
                         )
                     else:
                         self._show_result_panel(
-                            "❌ 错误", "安装失败，请检查密码是否正确或是否有sudo权限", success=False
+                            t("ui.install_cert.error"),
+                            t("ui.install_cert.error_msg"),
+                            success=False,
                         )
             else:
-                self._show_result_panel("❌ 错误", "无效的选择", success=False)
+                self._show_result_panel(
+                    t("ui.install_cert.error"), t("ui.install_cert.error_invalid"), success=False
+                )
         except ValueError:
-            self._show_result_panel("❌ 错误", "无效的输入", success=False)
+            self._show_result_panel(
+                t("ui.install_cert.error"), t("ui.install_cert.error_input"), success=False
+            )
 
         self._wait_for_continue()
 
     def _remove_certificate(self):
         """Remove CA certificate from system"""
-        self._clear_and_show_header("🗑️  从系统移除CA证书")
+        self._clear_and_show_header(t("ui.remove_cert.title"))
 
         self._show_input_hint()
-        ca_name = self._safe_text_input("输入要移除的CA名称:")
+        ca_name = self._safe_text_input(t("ui.remove_cert.ca_name"))
         if not ca_name:
             return
 
-        if self._safe_confirm(
-            f"确认从系统移除CA '{ca_name}'?\n[注意: 需要sudo权限]", default=False
-        ):
+        if self._safe_confirm(t("ui.remove_cert.confirm", ca_name=ca_name), default=False):
             # Get sudo password
             password = questionary.password(
-                "请输入sudo密码:", instruction="(密码输入时不会显示)"
+                t("ui.remove_cert.password"), instruction=t("ui.install_cert.password_hint")
             ).ask()
 
             if password is None:
-                self._show_result_panel("ℹ️  提示", "已取消移除操作", success=True)
+                self._show_result_panel(
+                    t("ui.install_cert.cancelled"), t("ui.remove_cert.cancelled_msg"), success=True
+                )
                 self._wait_for_continue()
                 return
 
-            self.console.print("\n[yellow]正在从系统移除CA证书...[/yellow]")
+            self.console.print(f"\n[yellow]{t('ui.remove_cert.removing')}[/yellow]")
             if self.system_cert_manager.remove_ca_cert(ca_name, password):
-                self._show_result_panel("✅ 成功", f"CA证书 '{ca_name}' 已从系统移除", success=True)
+                self._show_result_panel(
+                    t("ui.install_cert.success"),
+                    t("ui.remove_cert.success_msg", ca_name=ca_name),
+                    success=True,
+                )
             else:
                 self._show_result_panel(
-                    "❌ 错误", "移除失败，请检查密码是否正确或证书是否存在", success=False
+                    t("ui.install_cert.error"), t("ui.remove_cert.error_msg"), success=False
                 )
 
         self._wait_for_continue()

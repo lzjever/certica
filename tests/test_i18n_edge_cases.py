@@ -52,7 +52,7 @@ class TestI18nEdgeCases:
         # Use a key that exists but with invalid format args
         result = t("ui.menu.title", invalid_arg="test")
         # Should return the translation without formatting
-        assert result == "🔒 CA Certificate Tool"
+        assert result == "🔒 CERTICA — CERTs In a Click, Always."
 
     def test_translation_key_not_found(self):
         """Test translation when key is not found"""

@@ -24,6 +24,12 @@ For development, use uv (recommended):
 Interactive UI Mode
 -------------------
 
+Certica features a beautiful, intuitive console UI that makes certificate management a breeze. Here's what it looks like:
+
+.. image:: _static/ui_demo.gif
+   :alt: Certica Interactive UI Demo
+   :align: center
+
 Launch the interactive UI:
 
 .. code-block:: bash

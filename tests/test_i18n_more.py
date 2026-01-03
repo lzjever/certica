@@ -38,7 +38,7 @@ class TestI18nMore:
         # This should trigger the exception handler at line 95-96
         result = t("ui.menu.title", invalid_arg="test")
         # Should return translation without formatting
-        assert result == "🔒 CA Certificate Tool"
+        assert result == "🔒 CERTICA — CERTs In a Click, Always."
 
     def test_translation_format_exception_in_fallback(self):
         """Test translation when format raises exception in fallback (covers line 102-105)"""
