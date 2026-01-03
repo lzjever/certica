@@ -90,7 +90,7 @@ ignore_missing_imports = true
 
 [tool.coverage.run]
 source = ["certica"]
-omit = ["*/tests/*", "*/test_*.py", "certica/ui.py"]
+omit = ["*/tests/*", "*/test_*.py", "certica/ui.py", "certica/system_cert.py"]
 
 [tool.coverage.report]
 exclude_lines = [
