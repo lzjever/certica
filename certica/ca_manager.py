@@ -112,6 +112,16 @@ authorityKeyIdentifier = keyid:always,issuer:always
                 "key_size": key_size,
                 "validity_days": validity_days,
             }
+        except (KeyboardInterrupt, Exception):
+            # Clean up partial files if creation was interrupted or failed
+            if ca_key_path.exists():
+                ca_key_path.unlink()
+            if ca_cert_path.exists():
+                ca_cert_path.unlink()
+            # Remove empty directory if both files are gone
+            if ca_subdir.exists() and not any(ca_subdir.iterdir()):
+                ca_subdir.rmdir()
+            raise
         finally:
             os.unlink(config_path)
 

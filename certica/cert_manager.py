@@ -158,6 +158,20 @@ class CertManager:
                 "type": cert_type,
                 "validity_days": validity_days,
             }
+        except (KeyboardInterrupt, Exception):
+            # Clean up partial files if creation was interrupted or failed
+            if key_path.exists():
+                key_path.unlink()
+            if cert_path.exists():
+                cert_path.unlink()
+            if csr_path.exists():
+                csr_path.unlink()
+            # Remove empty directories if all files are gone
+            if cert_output_dir.exists() and not any(cert_output_dir.iterdir()):
+                cert_output_dir.rmdir()
+            if ca_certs_dir.exists() and not any(ca_certs_dir.iterdir()):
+                ca_certs_dir.rmdir()
+            raise
         finally:
             os.unlink(config_path)
 
