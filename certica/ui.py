@@ -77,7 +77,7 @@ class CAUITool:
     def _safe_select(self, message: str, choices, default=None, **kwargs):
         """Wrapper for questionary.select that handles KeyboardInterrupt"""
         try:
-            return self._safe_select(message, choices=choices, default=default, **kwargs)
+            return questionary.select(message, choices=choices, default=default, **kwargs).ask()
         except KeyboardInterrupt:
             # Return None to indicate cancellation
             return None
@@ -85,7 +85,7 @@ class CAUITool:
     def _safe_confirm(self, message: str, default=False, **kwargs):
         """Wrapper for questionary.confirm that handles KeyboardInterrupt"""
         try:
-            return self._safe_confirm(message, default=default, **kwargs)
+            return questionary.confirm(message, default=default, **kwargs).ask()
         except KeyboardInterrupt:
             # Return None to indicate cancellation
             return None
