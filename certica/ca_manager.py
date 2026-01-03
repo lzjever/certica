@@ -50,7 +50,7 @@ class CAManager:
         # This handles the case where previous creation was interrupted
         if ca_key_path.exists() and ca_cert_path.exists():
             raise FileExistsError(f"CA {ca_name} already exists")
-        
+
         # Clean up partial files from previous interrupted creation
         if ca_key_path.exists() and not ca_cert_path.exists():
             ca_key_path.unlink()
@@ -59,6 +59,9 @@ class CAManager:
         # Remove empty directory if both files are gone
         if ca_subdir.exists() and not any(ca_subdir.iterdir()):
             ca_subdir.rmdir()
+
+        # Ensure directory exists (it might have been removed during cleanup)
+        ca_subdir.mkdir(parents=True, exist_ok=True)
 
         # Create temporary config file
         with tempfile.NamedTemporaryFile(mode="w", suffix=".cnf", delete=False) as f:

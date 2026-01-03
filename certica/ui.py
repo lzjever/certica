@@ -61,11 +61,11 @@ class CAUITool:
     def _get_select_instruction(self) -> str:
         """Get instruction text for select prompts"""
         return t("ui.instruction.arrow_keys")
-    
+
     def _show_input_hint(self):
         """Show hint about Ctrl+C cancellation before text input"""
         self.console.print(f"[dim]{t('ui.instruction.ctrl_c')}[/dim]\n")
-    
+
     def _safe_text_input(self, message: str, default: str = "", **kwargs):
         """Wrapper for questionary.text that handles KeyboardInterrupt"""
         try:
@@ -73,7 +73,7 @@ class CAUITool:
         except KeyboardInterrupt:
             # Return None to indicate cancellation
             return None
-    
+
     def _safe_select(self, message: str, choices, default=None, **kwargs):
         """Wrapper for questionary.select that handles KeyboardInterrupt"""
         try:
@@ -81,7 +81,7 @@ class CAUITool:
         except KeyboardInterrupt:
             # Return None to indicate cancellation
             return None
-    
+
     def _safe_confirm(self, message: str, default=False, **kwargs):
         """Wrapper for questionary.confirm that handles KeyboardInterrupt"""
         try:
