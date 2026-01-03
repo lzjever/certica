@@ -52,7 +52,7 @@ def set_language(lang: str) -> bool:
     Returns:
         True if language is supported and loaded, False otherwise
     """
-    global _current_language, _translations
+    global _current_language, _translations  # noqa: F824
 
     # Normalize language code (e.g., 'zh-CN' -> 'zh')
     lang = lang.lower().split("-")[0]
