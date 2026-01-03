@@ -1,0 +1,22 @@
+version: 2
+
+# Build environment
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.11"
+
+# Build documentation with Sphinx
+sphinx:
+  configuration: docs/source/conf.py
+  builder: html
+  fail_on_warning: false
+
+# Python environment
+python:
+  install:
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs
+

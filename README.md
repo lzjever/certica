@@ -1,198 +1,435 @@
-# Certica - CA Certificate Generation Tool
+# Certica 🔒
 
-一个简单易用的CA证书生成工具，用于本地开发和测试。
+[![PyPI version](https://img.shields.io/pypi/v/certica.svg)](https://pypi.org/project/certica/)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-## 功能特性
+**Certica** is a user-friendly CA certificate generation tool for local development and testing with multi-language support.
 
-1. **创建根CA证书** - 生成自签名根证书和私钥
-2. **签发证书** - 支持服务器和客户端证书签发，可配置DNS名称、IP地址等
-3. **模板支持** - 使用模板文件保存常用配置，减少重复输入
-4. **交互式界面** - 提供友好的终端图形界面（使用Rich库，支持emoji图标）
-5. **命令行接口** - 支持完整的命令行操作
-6. **系统集成** - 可以将CA证书安装到系统信任存储，或从系统中移除
-7. **智能目录组织** - 证书按CA自动分类存储，清晰易管理
-8. **路径简化显示** - 自动去掉冗长的路径前缀，显示更简洁
-9. **多发行版支持** - 自动检测Linux发行版，使用相应的证书安装方法
-10. **安装验证** - 自动验证证书安装和卸载是否成功
+## ✨ Features
 
-## 安装
+- 🔐 **Root CA Creation** - Generate self-signed root certificates and private keys
+- 📜 **Certificate Signing** - Sign server and client certificates with configurable DNS names and IP addresses
+- 📝 **Template Support** - Save common configurations in templates to reduce repetitive input
+- 🎨 **Interactive UI** - Beautiful terminal graphical interface using Rich library with emoji icons
+- 💻 **Command Line Interface** - Full CLI support for automation and scripting
+- 🔧 **System Integration** - Install/remove CA certificates from system trust store
+- 🌍 **Multi-Language** - Support for English, Chinese, French, Russian, Japanese, and Korean
+- 🗂️ **Smart Organization** - Certificates automatically organized by CA for easy management
+- ✅ **Installation Verification** - Automatic verification of certificate installation and removal
+- 🐧 **Multi-Distribution** - Automatic Linux distribution detection with appropriate installation methods
 
-### 从源码安装
+## 📦 Installation
 
-```bash
-# 克隆仓库
-git clone https://github.com/metarigin/certica.git
-cd certica
-
-# 安装依赖
-pip install -r requirements.txt
-
-# 或者使用 pip 安装
-pip install -e .
-```
-
-### 使用 pip 安装（如果已发布到 PyPI）
+### Quick Install
 
 ```bash
 pip install certica
 ```
 
-## 快速开始
+### Development Setup with uv (Recommended)
 
-### 交互式界面（推荐）
-
-直接运行脚本（不带参数）进入交互式界面：
+This project uses [uv](https://github.com/astral-sh/uv) for fast dependency management. Install uv first:
 
 ```bash
-python main.py
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-或者如果已安装：
+Then set up the development environment:
+
+**Recommended: For active development**
 
 ```bash
-certica
+# Install package with all development dependencies (recommended)
+make dev-install
+
+# Or manually with uv (dev group is installed by default)
+uv sync --group docs
 ```
 
-交互式界面提供：
-- 🎨 美观的图形界面（使用Rich库）
-- 🔒 清晰的菜单选项（带emoji图标）
-- 📋 格式化的表格显示
-- 🖥️ 自动识别证书类型（服务器/客户端）
-- 📑 按CA筛选证书列表
-
-### 命令行模式
-
-#### 创建根CA证书
+**Alternative: Dependencies only (for CI/CD or code review)**
 
 ```bash
-# 使用默认值
+# Create virtual environment and install dependencies only (without installing the package)
+# Useful for: CI/CD pipelines, code review, or when you only need development tools
+make setup-venv
+
+# Later, if you need to install the package:
+make install
+```
+
+All `make` commands will automatically use `uv` if available, otherwise fall back to `pip`.
+
+For detailed setup instructions, see [SETUP.md](SETUP.md).
+
+## 🚀 Quick Start
+
+### Interactive UI Mode (Recommended for Beginners)
+
+To launch the interactive UI, use the `ui` command:
+
+```bash
+certica ui
+```
+
+Or with a specific language:
+
+```bash
+certica ui --lang zh  # Chinese
+certica ui --lang fr  # French
+certica ui --lang ru  # Russian
+certica ui --lang ja  # Japanese
+certica ui --lang ko  # Korean
+```
+
+**Important Notes:**
+- The `--lang` option is **only available in UI mode** (`certica ui --lang <code>`)
+- CLI commands always use English for script compatibility
+- Running `certica` without any command shows help information
+
+The interactive interface provides:
+- 🎨 Beautiful graphical interface
+- 🔒 Clear menu options with emoji icons
+- 📋 Formatted table displays
+- 🖥️ Automatic certificate type recognition
+- 📑 Filter certificates by CA
+
+### Command Line Mode
+
+**Important**: 
+- Running `certica` without any command shows help information
+- Use `certica ui` to enter interactive mode
+- The `--lang` option is **only available in UI mode** (`certica ui --lang <code>`)
+- CLI commands always use English for script compatibility
+
+#### Create Root CA Certificate
+
+```bash
+# Use default values
 certica create-ca
 
-# 自定义参数
+# Custom parameters
 certica create-ca --name myca --org "My Company" --validity 3650
 
-# 使用模板
-certica create-ca --template default
+# Use template
+certica create-ca --template myorg --name myca
 ```
 
-#### 签发证书
+#### Sign Certificate
 
 ```bash
-# 签发服务器证书
+# Sign server certificate
 certica sign --ca myca --name nginx-server --type server \
     --dns localhost --dns example.com --ip 127.0.0.1
 
-# 签发客户端证书
+# Sign client certificate
 certica sign --ca myca --name client1 --type client
 
-# 使用模板
-certica sign --ca myca --name etcd-server --type server \
-    --template etcd --dns etcd.local --ip 10.0.0.1
+# Use template
+certica sign --ca myca --name server1 --template myorg --type server
 ```
 
-#### 管理证书
+#### List Certificates
 
 ```bash
-# 列出所有CA
+# List all CAs
 certica list-cas
 
-# 列出所有已签发的证书
+# List all signed certificates
 certica list-certs
 
-# 列出特定CA签发的证书
+# List certificates for a specific CA
 certica list-certs --ca myca
 ```
 
-#### 系统证书管理
+#### System Certificate Management
 
 ```bash
-# 安装CA到系统（需要sudo权限）
+# Install CA to system (requires sudo privileges)
 certica install --ca myca
 
-# 从系统移除CA（需要sudo权限）
+# Remove CA from system (requires sudo privileges)
 certica remove --ca myca
 ```
 
-## 文件结构
+## 🌍 Language Support
 
-所有生成的文件都保存在 `output/` 目录下，**按CA自动组织**：
+Certica supports multiple languages in **UI mode only**. Use the `--lang` or `-l` option with the `ui` command:
+
+```bash
+# Launch UI with English (default)
+certica ui
+
+# Launch UI with Chinese
+certica ui --lang zh
+
+# Launch UI with French
+certica ui --lang fr
+
+# Launch UI with Russian
+certica ui --lang ru
+
+# Launch UI with Japanese
+certica ui --lang ja
+
+# Launch UI with Korean
+certica ui --lang ko
+```
+
+**Supported languages:**
+- `en` - English (default)
+- `zh` - Chinese (中文)
+- `fr` - French (Français)
+- `ru` - Russian (Русский)
+- `ja` - Japanese (日本語)
+- `ko` - Korean (한국어)
+
+**Important Notes:**
+- The `--lang` option is **only available in UI mode** (`certica ui --lang <code>`)
+- CLI commands always use English for script compatibility
+- If an unsupported language is specified, the tool will warn and fall back to English
+
+## 📁 Output File Structure
+
+All generated files are saved in the `output/` directory (or the directory specified by `--base-dir`), **automatically organized by CA**:
 
 ```
 output/
-├── ca/                          # 根CA证书目录
-│   └── {ca_name}/               # 每个CA有自己的目录
-│       ├── {ca_name}.key.pem    # CA私钥
-│       └── {ca_name}.cert.pem   # CA证书
-├── certs/                       # 签发的证书目录
-│   └── {ca_name}/               # 按CA名称组织
-│       └── {cert_name}/         # 每个证书有自己的目录
-│           ├── key.pem          # 证书私钥
-│           └── cert.pem         # 证书
-└── templates/                   # 模板文件目录
+├── ca/                          # Root CA certificate directory
+│   └── {ca_name}/               # Each CA has its own directory
+│       ├── {ca_name}.key.pem    # CA private key
+│       └── {ca_name}.cert.pem   # CA certificate
+├── certs/                       # Signed certificate directory
+│   └── {ca_name}/               # Organized by CA name
+│       └── {cert_name}/         # Each certificate has its own directory
+│           ├── key.pem          # Certificate private key
+│           └── cert.pem         # Certificate
+└── templates/                   # Template file directory
     ├── default.json
     ├── etcd.json
     └── nginx.json
 ```
 
-### 目录组织优势
+### Directory Organization Benefits
 
-- ✅ **清晰分离**：不同CA签发的证书自动分开存储
-- ✅ **易于查找**：从目录结构就能看出证书的归属关系
-- ✅ **便于管理**：可以轻松删除某个CA及其所有证书
-- ✅ **路径简洁**：显示时自动去掉 `output/` 前缀
+- ✅ **Clear Separation**: Certificates signed by different CAs are automatically stored separately
+- ✅ **Easy to Find**: The directory structure clearly shows the certificate ownership relationship
+- ✅ **Easy to Manage**: Can easily delete a CA and all its certificates
+- ✅ **Clean Paths**: Automatically removes `output/` prefix when displaying
 
-## 系统要求
+## 📖 Usage Examples
 
-- Python 3.8+
-- OpenSSL（系统自带）
-- Linux/macOS/Windows
+### Example 1: Create Certificate for Local Nginx
 
-## 支持的Linux发行版
+```bash
+# 1. Create root CA
+certica create-ca --name local-ca
 
-工具会自动检测Linux发行版并使用相应的证书安装方法：
+# 2. Sign server certificate
+certica sign --ca local-ca --name nginx \
+    --type server --dns localhost --ip 127.0.0.1
+
+# 3. Install CA to system (so browsers won't complain)
+sudo certica install --ca local-ca
+
+# 4. Use in nginx configuration
+# ssl_certificate output/certs/local-ca/nginx/cert.pem;
+# ssl_certificate_key output/certs/local-ca/nginx/key.pem;
+```
+
+### Example 2: Create Certificates for etcd
+
+```bash
+# 1. Create root CA
+certica create-ca --name etcd-ca
+
+# 2. Sign server certificate
+certica sign --ca etcd-ca --name etcd-server \
+    --type server --dns etcd.local --dns etcd-0.etcd.local \
+    --ip 10.0.0.1 --ip 10.0.0.2
+
+# 3. Sign client certificate
+certica sign --ca etcd-ca --name etcd-client --type client
+```
+
+### Example 3: Using Templates
+
+```bash
+# 1. Create template
+certica create-template --name myorg \
+    --org "My Organization" --country CN
+
+# 2. Use template to create CA
+certica create-ca --template myorg --name myca
+
+# 3. Use template to sign certificate
+certica sign --ca myca --name server1 \
+    --template myorg --type server --dns server1.example.com
+```
+
+## 🔧 Using Generated Certificates
+
+### For Web Servers (Nginx, Apache)
+
+1. **Install CA to system** (so browsers trust it):
+   ```bash
+   sudo certica install --ca your-ca-name
+   ```
+
+2. **Configure your web server**:
+   
+   **Nginx:**
+   ```nginx
+   server {
+       listen 443 ssl;
+       ssl_certificate /path/to/output/certs/your-ca/your-cert/cert.pem;
+       ssl_certificate_key /path/to/output/certs/your-ca/your-cert/key.pem;
+   }
+   ```
+   
+   **Apache:**
+   ```apache
+   <VirtualHost *:443>
+       SSLEngine on
+       SSLCertificateFile /path/to/output/certs/your-ca/your-cert/cert.pem
+       SSLCertificateKeyFile /path/to/output/certs/your-ca/your-cert/key.pem
+   </VirtualHost>
+   ```
+
+### For etcd
+
+Use the certificates in your etcd configuration:
+
+```yaml
+# etcd server
+peer-cert-file: /path/to/output/certs/etcd-ca/etcd-server/cert.pem
+peer-key-file: /path/to/output/certs/etcd-ca/etcd-server/key.pem
+
+# etcd client
+cert-file: /path/to/output/certs/etcd-ca/etcd-client/cert.pem
+key-file: /path/to/output/certs/etcd-ca/etcd-client/key.pem
+```
+
+### For Docker
+
+Copy certificates into your Docker containers:
+
+```dockerfile
+COPY output/certs/myca/myserver/ /etc/ssl/certs/
+```
+
+Or mount as volumes:
+
+```bash
+docker run -v /path/to/output/certs/myca/myserver:/etc/ssl/certs your-image
+```
+
+## 🖥️ System Requirements
+
+- **Python**: 3.8 or higher
+- **OpenSSL**: Usually pre-installed on Linux/macOS
+- **Operating System**: Linux, macOS, or Windows
+
+## 🐧 Supported Linux Distributions
+
+The tool automatically detects Linux distributions and uses the appropriate certificate installation method:
 
 - **Debian/Ubuntu**: `/usr/local/share/ca-certificates/` + `update-ca-certificates`
 - **Fedora/RHEL/CentOS**: `/etc/pki/ca-trust/source/anchors/` + `update-ca-trust extract`
 - **Arch/Manjaro**: `/etc/ca-certificates/trust-source/anchors/` + `trust extract-compat`
 - **openSUSE/SLES**: `/etc/pki/trust/anchors/` + `update-ca-certificates`
 
-## 依赖
+## 📋 Command Reference
 
-- `click>=7.0.0` - 命令行接口
-- `rich>=10.0.0` - 终端美化
-- `questionary>=1.10.0` - 交互式提示
+### Global Options
 
-## 系统检查
+- `--base-dir`: Base directory for output files (default: `output`)
+- `--skip-check`: Skip system requirements check
+- `--check-only`: Only check system requirements and exit
 
-工具在启动时会自动检查所需的系统工具是否可用：
+### Commands
 
-- **必需工具**：OpenSSL（用于证书生成）
-- **可选工具**：系统证书管理工具（用于安装证书到系统）
-  - Linux: `update-ca-certificates`, `update-ca-trust`, `trust`, `sudo`
-  - macOS: `security`, `sudo`
-  - Windows: `certutil`
+- `ui`: Launch interactive UI mode (use `--lang` option here for language selection)
+- `create-ca`: Create a root CA certificate
+- `sign`: Sign a certificate using the specified CA
+- `list-cas`: List all available CA certificates
+- `list-certs`: List all signed certificates, optionally filtered by CA
+- `create-template`: Create a template file
+- `list-templates`: List all available templates
+- `install`: Install CA certificate to system trust store
+- `remove`: Remove CA certificate from system trust store
+- `info`: Show certificate information
 
-### 手动检查系统要求
+For detailed help on any command:
 
 ```bash
-# 仅检查系统要求
-certica --check-only
-
-# 跳过系统检查（不推荐）
-certica --skip-check <command>
+certica --help              # Show all commands
+certica ui --help           # Show UI mode options
+certica create-ca --help    # Show create-ca options
+certica sign --help         # Show sign options
 ```
 
-## 许可证
+## 🧪 Development
 
-MIT License
+### Running Tests
 
-## 贡献
+```bash
+make test          # Run all tests
+make test-cov      # Run tests with coverage
+```
 
-欢迎提交 Issue 和 Pull Request！
+### Code Quality
 
-## 更多文档
+```bash
+make lint          # Run linting
+make format        # Format code
+make check         # Run all checks
+```
 
-- [快速开始指南](CA_TOOL_QUICKSTART.md)
-- [详细文档](CA_TOOL_README.md)
-- [项目结构说明](STRUCTURE.md)
+### Building
 
+```bash
+make build         # Build distributions
+make sdist         # Build source distribution
+make wheel         # Build wheel distribution
+```
+
+For more information, see:
+- [SETUP.md](SETUP.md) - Development setup
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Contributing guidelines
+- [I18N_GUIDE.md](I18N_GUIDE.md) - Adding new languages
+
+## 📚 Documentation
+
+- [Quick Start Guide](CA_TOOL_QUICKSTART.md) - Quick start guide
+- [Quick Start Guide (中文)](CA_TOOL_QUICKSTART_cn.md) - 快速开始指南
+- [I18N Guide](I18N_GUIDE.md) - How to add or improve translations
+- [Development Setup](SETUP.md) - Development environment setup
+- [Contributing](CONTRIBUTING.md) - How to contribute
+
+## 🤝 Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+### Adding New Languages
+
+To add support for a new language, see [I18N_GUIDE.md](I18N_GUIDE.md).
+
+## 📝 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Built with [Click](https://click.palletsprojects.com/) for CLI
+- Beautiful UI powered by [Rich](https://github.com/Textualize/rich)
+- Interactive prompts by [Questionary](https://github.com/tmbo/questionary)
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/metarigin/certica/issues)
+- **Documentation**: [README](README.md) and [docs](CA_TOOL_README.md)
+
+---
+
+Made with ❤️ by [Metarigin](https://github.com/metarigin)

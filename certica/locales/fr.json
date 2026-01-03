@@ -1,0 +1,20 @@
+{
+  "ui.menu.title": "🔒 Outil de Certificat CA",
+  "ui.menu.select_operation": "Sélectionnez une opération:",
+  "ui.menu.exit": "❌ Quitter",
+  "ui.menu.create_ca": "🔐 Créer un certificat CA racine",
+  "ui.menu.sign_cert": "📜 Signer un certificat (Serveur/Client)",
+  "ui.menu.manage_cas": "🔑 Gérer les certificats CA racine (Voir/Supprimer)",
+  "ui.menu.manage_certs": "📜 Gérer les certificats signés (Voir/Supprimer)",
+  "ui.menu.manage_templates": "📝 Gérer les fichiers de modèle",
+  "ui.menu.install_cert": "🔧 Installer le certificat CA dans le système",
+  "ui.menu.remove_cert": "🗑️  Retirer le certificat CA du système",
+  "ui.goodbye": "Au revoir!",
+  "ui.wait_continue": "Appuyez sur Entrée pour continuer...",
+  "ui.success": "✅ Succès",
+  "ui.notice": "ℹ️  Avis",
+  "cli.description": "Outil de génération de certificat CA - Interface en ligne de commande",
+  "main.exiting": "Sortie en cours...",
+  "lang.unsupported": "Avertissement: La langue '{lang}' n'est pas prise en charge. Utilisation de l'anglais à la place."
+}
+

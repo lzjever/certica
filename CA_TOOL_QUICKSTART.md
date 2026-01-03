@@ -1,198 +1,190 @@
-# CA工具快速开始指南
+# Certica Quick Start Guide
 
-## 安装依赖
+## Installation
+
+### Quick Install
 
 ```bash
-pip install click rich
+pip install certica
 ```
 
-或者：
+### Development Setup
+
+For development, install dependencies:
 
 ```bash
+# Using uv (recommended)
+uv sync --group docs
+
+# Or using pip
 pip install -r requirements.txt
 ```
 
-## 快速使用
+## Quick Usage
 
-### 方式1: 交互式界面（推荐新手）✨
+### Method 1: Interactive UI (Recommended for Beginners) ✨
 
 ```bash
-certica
+certica ui
 ```
 
-然后按照菜单提示操作即可。界面特点：
-- 🎨 美观的图形界面
-- 🔒 清晰的菜单选项（带emoji图标）
-- 📋 格式化的表格显示
-- 🖥️ 自动识别证书类型
+Or with a specific language:
 
-**菜单选项：**
-- `0` ❌ 退出
-- `1` 🔐 创建根CA证书
-- `2` 📜 签发证书（服务器/客户端）
-- `3` 📋 列出所有CA证书
-- `4` 📑 列出已签发的证书（按CA筛选）
-- `5` 📝 管理模板文件
-- `6` 🔧 安装CA证书到系统
-- `7` 🗑️ 从系统移除CA证书
+```bash
+certica ui --lang zh  # Chinese
+certica ui --lang fr  # French
+certica ui --lang ru  # Russian
+certica ui --lang ja  # Japanese
+certica ui --lang ko  # Korean
+```
 
-### 方式2: 命令行（适合脚本和自动化）
+Then follow the menu prompts. The interface features:
+- 🎨 Beautiful graphical interface
+- 🔒 Clear menu options with emoji icons
+- 📋 Formatted table displays
+- 🖥️ Automatic certificate type recognition
 
-#### 创建根CA
+**Menu Options:**
+- `0` ❌ Exit
+- `1` 🔐 Create root CA certificate
+- `2` 📜 Sign certificate (server/client)
+- `3` 📋 List all CA certificates
+- `4` 📑 List signed certificates (filter by CA)
+- `5` 📝 Manage template files
+- `6` 🔧 Install CA certificate to system
+- `7` 🗑️ Remove CA certificate from system
+
+### Method 2: Command Line (Suitable for Scripts and Automation)
+
+#### Create Root CA
+
 ```bash
 certica create-ca --name myca
 ```
 
-#### 签发服务器证书（用于nginx等）
-```bash
-certica sign --ca myca --name nginx \
-    --type server --dns localhost --dns example.com --ip 127.0.0.1
-```
+#### Sign Certificate
 
-#### 签发客户端证书（用于etcd客户端等）
 ```bash
+# Sign server certificate
+certica sign --ca myca --name nginx-server --type server \
+    --dns localhost --dns example.com --ip 127.0.0.1
+
+# Sign client certificate
 certica sign --ca myca --name client1 --type client
 ```
 
-#### 查看所有CA
+#### List Certificates
+
 ```bash
+# List all CAs
 certica list-cas
-```
 
-#### 查看所有证书
-```bash
+# List all signed certificates
 certica list-certs
-```
 
-#### 查看特定CA的证书
-```bash
+# List certificates for a specific CA
 certica list-certs --ca myca
 ```
 
-#### 安装CA到系统（需要sudo）
+#### System Certificate Management
+
 ```bash
+# Install CA to system (requires sudo privileges)
 sudo certica install --ca myca
+
+# Remove CA from system (requires sudo privileges)
+sudo certica remove --ca myca
 ```
 
-## 常用场景
+## Common Use Cases
 
-### 场景1: 为本地nginx创建证书
+### Use Case 1: Local Nginx Development
 
 ```bash
-# 1. 创建CA
+# 1. Create root CA
 certica create-ca --name local-ca
 
-# 2. 签发证书
+# 2. Sign server certificate
 certica sign --ca local-ca --name nginx \
     --type server --dns localhost --ip 127.0.0.1
 
-# 3. 安装CA到系统（这样浏览器不会报错）
+# 3. Install CA to system (so browsers won't complain)
 sudo certica install --ca local-ca
 
-# 4. 在nginx配置中使用
+# 4. Use in nginx configuration
 # ssl_certificate output/certs/local-ca/nginx/cert.pem;
 # ssl_certificate_key output/certs/local-ca/nginx/key.pem;
 ```
 
-### 场景2: 为etcd创建证书
+### Use Case 2: etcd Cluster
 
 ```bash
-# 1. 创建CA
+# 1. Create root CA
 certica create-ca --name etcd-ca
 
-# 2. 签发服务器证书
+# 2. Sign server certificate
 certica sign --ca etcd-ca --name etcd-server \
     --type server --dns etcd.local --dns etcd-0.etcd.local \
     --ip 10.0.0.1 --ip 10.0.0.2
 
-# 3. 签发客户端证书
+# 3. Sign client certificate
 certica sign --ca etcd-ca --name etcd-client --type client
 ```
 
-### 场景3: 使用模板
+### Use Case 3: Using Templates
 
 ```bash
-# 1. 创建模板
+# 1. Create template
 certica create-template --name myorg \
-    --org "My Organization" --country CN
+    --org "My Organization" --country US
 
-# 2. 使用模板创建CA
+# 2. Use template to create CA
 certica create-ca --template myorg --name myca
 
-# 3. 使用模板签发证书
+# 3. Use template to sign certificate
 certica sign --ca myca --name server1 \
     --template myorg --type server --dns server1.example.com
 ```
 
-## 文件位置
+## Output File Structure
 
-所有生成的文件都在 `output/` 目录，**按CA自动组织**：
+All generated files are saved in the `output/` directory, automatically organized by CA:
 
 ```
 output/
-├── ca/                    # 根CA证书（每个CA一个目录）
-│   └── {ca_name}/
-│       ├── {ca_name}.key.pem
-│       └── {ca_name}.cert.pem
-├── certs/                 # 签发的证书（按CA组织）
-│   └── {ca_name}/
-│       └── {cert_name}/
-│           ├── key.pem
-│           └── cert.pem
-└── templates/             # 模板文件
-    └── *.json
+├── ca/                          # Root CA certificate directory
+│   └── {ca_name}/               # Each CA has its own directory
+│       ├── {ca_name}.key.pem    # CA private key
+│       └── {ca_name}.cert.pem   # CA certificate
+├── certs/                       # Signed certificate directory
+│   └── {ca_name}/               # Organized by CA name
+│       └── {cert_name}/         # Each certificate has its own directory
+│           ├── key.pem          # Certificate private key
+│           └── cert.pem         # Certificate
+└── templates/                   # Template file directory
+    ├── default.json
+    ├── etcd.json
+    └── nginx.json
 ```
 
-**重要提示：**
-- 不同CA的证书自动分开存储，不会混淆
-- 从目录结构就能看出证书的归属关系
-- 显示路径时会自动去掉 `output/` 前缀，更简洁
+## Important Notes
 
-## 路径显示说明
+- **Language Support**: The `--lang` option is only available in UI mode (`certica ui --lang <code>`)
+- **CLI Commands**: Always use English for script compatibility
+- **Help**: Run `certica --help` to see all available commands
+- **System Requirements**: Python 3.8+, OpenSSL (usually pre-installed)
 
-工具会自动简化路径显示：
+## Getting Help
 
-**实际存储：** `/path/to/output/ca/myca/myca.key.pem`  
-**显示为：** `ca/myca/myca.key.pem`
-
-## 帮助信息
-
-查看所有命令：
 ```bash
+# General help
 certica --help
-```
 
-查看具体命令帮助：
-```bash
+# Command-specific help
 certica create-ca --help
 certica sign --help
-certica list-certs --help
+certica ui --help
 ```
 
-## 交互式界面示例
+For more detailed documentation, see [README.md](README.md).
 
-启动交互式界面后，你会看到：
-
-```
-╭─────────────────────────────── 🔒 CA证书工具 ────────────────────────────────╮
-│ 0  ❌ 退出                                                                   │
-│ 1  🔐 创建根CA证书                                                           │
-│ 2  📜 签发证书（服务器/客户端）                                              │
-│ 3  📋 列出所有CA证书                                                         │
-│ 4  📑 列出已签发的证书（按CA筛选）                                           │
-│ 5  📝 管理模板文件                                                           │
-│ 6  🔧 安装CA证书到系统                                                       │
-│ 7  🗑️  从系统移除CA证书                                                       │
-╰──────────────────────────────────────────────────────────────────────────────╯
-
-请选择操作 (0):
-```
-
-选择操作后，工具会引导你完成后续步骤。
-
-## 提示
-
-- 💡 **新手推荐**：使用交互式界面，操作更直观
-- 💡 **自动化脚本**：使用命令行模式，便于集成
-- 💡 **多CA管理**：每个CA独立目录，互不干扰
-- 💡 **路径简洁**：显示时自动简化，更易读

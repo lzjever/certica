@@ -1,5 +1,12 @@
 include README.md
 include LICENSE
-include requirements.txt
-recursive-include certica/output/templates *.json
-
+include CHANGELOG.md
+include CONTRIBUTING.md
+include SETUP.md
+include pyproject.toml
+include pytest.ini
+recursive-include certica/locales *.json
+recursive-include certica *.py
+global-exclude __pycache__
+global-exclude *.py[co]
+global-exclude .git*
