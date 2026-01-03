@@ -158,6 +158,7 @@
   "ui.notice": "ℹ️  提示",
   "ui.instruction.arrow_keys": "使用方向键",
   "ui.instruction.enter_select": "按回车键选择",
+  "ui.instruction.ctrl_c": "💡 提示：随时按 Ctrl+C 可取消并返回上一级菜单",
   "cli.description": "CA证书生成工具 - 命令行接口",
   "cli.error.system_check_failed": "错误: 系统要求检查失败。",
   "cli.error.system_check_hint": "使用 --skip-check 跳过此检查（不推荐）。",

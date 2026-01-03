@@ -158,6 +158,7 @@
   "ui.notice": "ℹ️  Notice",
   "ui.instruction.arrow_keys": "Use arrow keys",
   "ui.instruction.enter_select": "Press Enter to select",
+  "ui.instruction.ctrl_c": "💡 Tip: Press Ctrl+C at any time to cancel and return to the previous menu",
   "cli.description": "CA Certificate Generation Tool - Command Line Interface",
   "cli.error.system_check_failed": "Error: System requirements check failed.",
   "cli.error.system_check_hint": "Use --skip-check to bypass this check (not recommended).",

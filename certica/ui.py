@@ -61,6 +61,34 @@ class CAUITool:
     def _get_select_instruction(self) -> str:
         """Get instruction text for select prompts"""
         return t("ui.instruction.arrow_keys")
+    
+    def _show_input_hint(self):
+        """Show hint about Ctrl+C cancellation before text input"""
+        self.console.print(f"[dim]{t('ui.instruction.ctrl_c')}[/dim]\n")
+    
+    def _safe_text_input(self, message: str, default: str = "", **kwargs):
+        """Wrapper for questionary.text that handles KeyboardInterrupt"""
+        try:
+            return questionary.text(message, default=default, **kwargs).ask()
+        except KeyboardInterrupt:
+            # Return None to indicate cancellation
+            return None
+    
+    def _safe_select(self, message: str, choices, default=None, **kwargs):
+        """Wrapper for questionary.select that handles KeyboardInterrupt"""
+        try:
+            return self._safe_select(message, choices=choices, default=default, **kwargs)
+        except KeyboardInterrupt:
+            # Return None to indicate cancellation
+            return None
+    
+    def _safe_confirm(self, message: str, default=False, **kwargs):
+        """Wrapper for questionary.confirm that handles KeyboardInterrupt"""
+        try:
+            return self._safe_confirm(message, default=default, **kwargs)
+        except KeyboardInterrupt:
+            # Return None to indicate cancellation
+            return None
 
     def _clear_and_show_header(self, title: str):
         """Clear screen and show header"""
@@ -104,7 +132,7 @@ class CAUITool:
             self.console.print()
 
             # 使用方向键选择菜单
-            choice = questionary.select(
+            choice = self._safe_select(
                 t("ui.menu.select_operation"),
                 choices=[
                     questionary.Choice(t("ui.menu.exit"), value="0"),
@@ -118,7 +146,7 @@ class CAUITool:
                 ],
                 default="0",
                 instruction=self._get_select_instruction(),
-            ).ask()
+            )
 
             if not choice or choice == "0":
                 self.console.print(f"\n[green]{t('ui.goodbye')}[/green]")
@@ -141,41 +169,54 @@ class CAUITool:
     def _create_root_ca(self):
         """Create root CA certificate"""
         self._clear_and_show_header(t("ui.create_ca.title"))
+        self._show_input_hint()
 
         # Load template if available
         if self.template is None:
             self.template = self.template_manager.load_template()
 
         # 使用questionary收集输入
-        ca_name = questionary.text(t("ui.create_ca.ca_name"), default="myca").ask()
+        ca_name = self._safe_text_input(t("ui.create_ca.ca_name"), default="myca")
         if not ca_name:
             return
 
-        organization = questionary.text(
+        organization = self._safe_text_input(
             t("ui.create_ca.organization"),
             default=self.template.get("organization", "Development CA"),
-        ).ask()
+        )
+        if organization is None:
+            return
 
-        country = questionary.text(
+        country = self._safe_text_input(
             t("ui.create_ca.country"), default=self.template.get("country", "CN")
-        ).ask()
+        )
+        if country is None:
+            return
 
-        state = questionary.text(
+        state = self._safe_text_input(
             t("ui.create_ca.state"), default=self.template.get("state", "Beijing")
-        ).ask()
+        )
+        if state is None:
+            return
 
-        city = questionary.text(
+        city = self._safe_text_input(
             t("ui.create_ca.city"), default=self.template.get("city", "Beijing")
-        ).ask()
+        )
+        if city is None:
+            return
 
-        validity_str = questionary.text(
+        validity_str = self._safe_text_input(
             t("ui.create_ca.validity"),
             default=str(self.template.get("default_validity_days", 3650)),
-        ).ask()
+        )
+        if validity_str is None:
+            return
 
-        key_size_str = questionary.text(
+        key_size_str = self._safe_text_input(
             t("ui.create_ca.key_size"), default=str(self.template.get("default_key_size", 2048))
-        ).ask()
+        )
+        if key_size_str is None:
+            return
 
         try:
             validity = int(validity_str) if validity_str else 3650
@@ -238,11 +279,11 @@ class CAUITool:
         ca_choices = [
             questionary.Choice(f"🔑 {ca['name']}", value=str(i)) for i, ca in enumerate(cas)
         ]
-        ca_index_str = questionary.select(
+        ca_index_str = self._safe_select(
             t("ui.sign_cert.select_ca"),
             choices=ca_choices,
             instruction=self._get_select_instruction(),
-        ).ask()
+        )
 
         if ca_index_str is None:
             return
@@ -258,7 +299,7 @@ class CAUITool:
             self.template = self.template_manager.load_template()
 
         # Certificate type - 使用方向键选择
-        cert_type = questionary.select(
+        cert_type = self._safe_select(
             t("ui.sign_cert.cert_type"),
             choices=[
                 questionary.Choice(t("ui.sign_cert.cert_type_server"), value="server"),
@@ -266,48 +307,67 @@ class CAUITool:
             ],
             default="server",
             instruction=self._get_select_instruction(),
-        ).ask()
+        )
 
         if cert_type is None:
             return
 
-        cert_name = questionary.text(t("ui.sign_cert.cert_name")).ask()
+        self._show_input_hint()
+        cert_name = self._safe_text_input(t("ui.sign_cert.cert_name"))
         if not cert_name:
             return
 
-        common_name = questionary.text(t("ui.sign_cert.common_name"), default=cert_name).ask()
+        common_name = self._safe_text_input(t("ui.sign_cert.common_name"), default=cert_name)
+        if common_name is None:
+            return
 
         # DNS names
-        dns_input = questionary.text(t("ui.sign_cert.dns_names"), default="").ask() or ""
+        dns_input = self._safe_text_input(t("ui.sign_cert.dns_names"), default="") or ""
+        if dns_input is None:
+            return
         dns_names = [d.strip() for d in dns_input.split(",") if d.strip()]
 
         # IP addresses
-        ip_input = questionary.text(t("ui.sign_cert.ip_addresses"), default="").ask() or ""
+        ip_input = self._safe_text_input(t("ui.sign_cert.ip_addresses"), default="") or ""
+        if ip_input is None:
+            return
         ip_addresses = [ip.strip() for ip in ip_input.split(",") if ip.strip()]
 
-        organization = questionary.text(
+        organization = self._safe_text_input(
             t("ui.create_ca.organization"), default=self.template.get("organization", "Development")
-        ).ask()
+        )
+        if organization is None:
+            return
 
-        country = questionary.text(
+        country = self._safe_text_input(
             t("ui.create_ca.country"), default=self.template.get("country", "CN")
-        ).ask()
+        )
+        if country is None:
+            return
 
-        state = questionary.text(
+        state = self._safe_text_input(
             t("ui.create_ca.state"), default=self.template.get("state", "Beijing")
-        ).ask()
+        )
+        if state is None:
+            return
 
-        city = questionary.text(
+        city = self._safe_text_input(
             t("ui.create_ca.city"), default=self.template.get("city", "Beijing")
-        ).ask()
+        )
+        if city is None:
+            return
 
-        validity_str = questionary.text(
+        validity_str = self._safe_text_input(
             t("ui.create_ca.validity"), default=str(self.template.get("default_validity_days", 365))
-        ).ask()
+        )
+        if validity_str is None:
+            return
 
-        key_size_str = questionary.text(
+        key_size_str = self._safe_text_input(
             t("ui.create_ca.key_size"), default=str(self.template.get("default_key_size", 2048))
-        ).ask()
+        )
+        if key_size_str is None:
+            return
 
         try:
             validity = int(validity_str) if validity_str else 365
@@ -388,11 +448,11 @@ class CAUITool:
             ]
             ca_choices.append(questionary.Choice(t("ui.manage_cas.back"), value="back"))
 
-            ca_index_str = questionary.select(
+            ca_index_str = self._safe_select(
                 t("ui.manage_cas.select_ca"),
                 choices=ca_choices,
                 instruction=self._get_select_instruction(),
-            ).ask()
+            )
 
             if ca_index_str is None or ca_index_str == "back":
                 return
@@ -405,7 +465,7 @@ class CAUITool:
                 selected_ca = cas[ca_index]
 
                 # 选择操作
-                action = questionary.select(
+                action = self._safe_select(
                     t("ui.manage_cas.select_action", ca_name=selected_ca["name"]),
                     choices=[
                         questionary.Choice(t("ui.manage_cas.action_view"), value="view"),
@@ -474,7 +534,7 @@ class CAUITool:
         )
         self.console.print()
 
-        confirm = questionary.confirm(f"确定要删除根CA '{ca['name']}' 吗?", default=False).ask()
+        confirm = self._safe_confirm(f"确定要删除根CA '{ca['name']}' 吗?", default=False)
 
         if not confirm:
             self._show_result_panel("ℹ️  提示", "已取消删除操作", success=True)
@@ -512,11 +572,11 @@ class CAUITool:
             ]
             ca_choices.append(questionary.Choice("⬅️  返回主菜单", value="back"))
 
-            ca_index_str = questionary.select(
+            ca_index_str = self._safe_select(
                 t("ui.manage_certs.select_ca"),
                 choices=ca_choices,
                 instruction=self._get_select_instruction(),
-            ).ask()
+            )
 
             if ca_index_str is None or ca_index_str == "back":
                 return
@@ -581,11 +641,11 @@ class CAUITool:
 
                 cert_choices.append(questionary.Choice("⬅️  返回", value="back"))
 
-                cert_index_str = questionary.select(
+                cert_index_str = self._safe_select(
                     t("ui.manage_certs.select_cert", ca_name=selected_ca["name"]),
                     choices=cert_choices,
                     instruction=self._get_select_instruction(),
-                ).ask()
+                )
 
                 if cert_index_str is None or cert_index_str == "back":
                     continue
@@ -597,7 +657,7 @@ class CAUITool:
                 selected_cert = certs[cert_index]
 
                 # 选择操作
-                action = questionary.select(
+                action = self._safe_select(
                     t("ui.manage_certs.select_action", cert_name=selected_cert["name"]),
                     choices=[
                         questionary.Choice(t("ui.manage_certs.action_view"), value="view"),
@@ -605,7 +665,7 @@ class CAUITool:
                         questionary.Choice(t("ui.manage_cas.action_back"), value="back"),
                     ],
                     instruction=self._get_select_instruction(),
-                ).ask()
+                )
 
                 if action is None or action == "back":
                     continue
@@ -661,7 +721,7 @@ class CAUITool:
         )
         self.console.print()
 
-        confirm = questionary.confirm(f"确定要删除证书 '{cert['name']}' 吗?", default=False).ask()
+        confirm = self._safe_confirm(f"确定要删除证书 '{cert['name']}' 吗?", default=False)
 
         if not confirm:
             self._show_result_panel("ℹ️  提示", "已取消删除操作", success=True)
@@ -681,7 +741,7 @@ class CAUITool:
             self._clear_and_show_header("📝 模板管理")
 
             # 使用方向键选择
-            choice = questionary.select(
+            choice = self._safe_select(
                 t("ui.manage_templates.select_operation"),
                 choices=[
                     questionary.Choice(t("ui.manage_templates.back"), value="0"),
@@ -692,7 +752,7 @@ class CAUITool:
                 ],
                 default="0",
                 instruction=self._get_select_instruction(),
-            ).ask()
+            )
 
             if not choice or choice == "0":
                 break
@@ -709,17 +769,30 @@ class CAUITool:
         """Create a new template"""
         self._clear_and_show_header("➕ 创建模板")
 
-        template_name = questionary.text("模板名称:").ask()
+        self._show_input_hint()
+        template_name = self._safe_text_input("模板名称:")
         if not template_name:
             return
 
-        organization = questionary.text("默认机构名称:", default="Development").ask()
-        country = questionary.text("默认国家代码:", default="CN").ask()
-        state = questionary.text("默认省/州:", default="Beijing").ask()
-        city = questionary.text("默认城市:", default="Beijing").ask()
+        organization = self._safe_text_input("默认机构名称:", default="Development")
+        if organization is None:
+            return
+        country = self._safe_text_input("默认国家代码:", default="CN")
+        if country is None:
+            return
+        state = self._safe_text_input("默认省/州:", default="Beijing")
+        if state is None:
+            return
+        city = self._safe_text_input("默认城市:", default="Beijing")
+        if city is None:
+            return
 
-        validity_str = questionary.text("默认有效期（天）:", default="365").ask()
-        key_size_str = questionary.text("默认密钥长度:", default="2048").ask()
+        validity_str = self._safe_text_input("默认有效期（天）:", default="365")
+        if validity_str is None:
+            return
+        key_size_str = self._safe_text_input("默认密钥长度:", default="2048")
+        if key_size_str is None:
+            return
 
         try:
             validity = int(validity_str) if validity_str else 365
@@ -780,11 +853,11 @@ class CAUITool:
             questionary.Choice(f"📝 {template}", value=str(i))
             for i, template in enumerate(templates)
         ]
-        index_str = questionary.select(
+        index_str = self._safe_select(
             t("ui.manage_templates.load.select"),
             choices=template_choices,
             instruction=self._get_select_instruction(),
-        ).ask()
+        )
 
         if index_str is None:
             return
@@ -824,11 +897,11 @@ class CAUITool:
             questionary.Choice(f"📝 {template}", value=str(i))
             for i, template in enumerate(templates)
         ]
-        index_str = questionary.select(
+        index_str = self._safe_select(
             t("ui.manage_templates.delete.select"),
             choices=template_choices,
             instruction=self._get_select_instruction(),
-        ).ask()
+        )
 
         if index_str is None:
             return
@@ -838,7 +911,7 @@ class CAUITool:
             if 0 <= index < len(templates):
                 template_name = templates[index]
 
-                if questionary.confirm(f"确认删除模板 '{template_name}'?", default=False).ask():
+                if self._safe_confirm(f"确认删除模板 '{template_name}'?", default=False):
                     if self.template_manager.delete_template(template_name):
                         self._show_result_panel(
                             "✅ 成功", f"模板 '{template_name}' 已删除", success=True
@@ -866,11 +939,11 @@ class CAUITool:
         ca_choices = [
             questionary.Choice(f"🔑 {ca['name']}", value=str(i)) for i, ca in enumerate(cas)
         ]
-        ca_index_str = questionary.select(
+        ca_index_str = self._safe_select(
             t("ui.install_cert.select_ca"),
             choices=ca_choices,
             instruction=self._get_select_instruction(),
-        ).ask()
+        )
 
         if ca_index_str is None:
             return
@@ -880,10 +953,10 @@ class CAUITool:
             if 0 <= ca_index < len(cas):
                 selected_ca = cas[ca_index]
 
-                if questionary.confirm(
+                if self._safe_confirm(
                     f"确认安装CA '{selected_ca['name']}' 到系统?\n[注意: 需要sudo权限]",
                     default=False,
-                ).ask():
+                ):
                     # Get sudo password
                     password = questionary.password(
                         "请输入sudo密码:", instruction="(密码输入时不会显示)"
@@ -916,13 +989,14 @@ class CAUITool:
         """Remove CA certificate from system"""
         self._clear_and_show_header("🗑️  从系统移除CA证书")
 
-        ca_name = questionary.text("输入要移除的CA名称:").ask()
+        self._show_input_hint()
+        ca_name = self._safe_text_input("输入要移除的CA名称:")
         if not ca_name:
             return
 
-        if questionary.confirm(
+        if self._safe_confirm(
             f"确认从系统移除CA '{ca_name}'?\n[注意: 需要sudo权限]", default=False
-        ).ask():
+        ):
             # Get sudo password
             password = questionary.password(
                 "请输入sudo密码:", instruction="(密码输入时不会显示)"
