@@ -3,10 +3,9 @@ Internationalization (i18n) module for Certica
 Supports multiple languages with fallback to English
 """
 
-import os
 import json
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict
 
 # Supported languages
 SUPPORTED_LANGUAGES = {

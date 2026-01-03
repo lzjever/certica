@@ -2,8 +2,7 @@
 Tests for internationalization (i18n) module
 """
 
-import pytest
-from certica.i18n import set_language, get_language, t, get_supported_languages, SUPPORTED_LANGUAGES
+from certica.i18n import set_language, get_language, t, get_supported_languages
 
 
 def test_set_language():

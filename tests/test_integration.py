@@ -2,7 +2,6 @@
 Integration tests for Certica
 """
 
-import pytest
 from pathlib import Path
 from certica.ca_manager import CAManager
 from certica.cert_manager import CertManager
@@ -108,7 +107,7 @@ def test_multiple_cas(temp_dir):
     # Sign certificates with different CAs
     cert_manager = CertManager(base_dir=str(temp_dir))
 
-    cert1 = cert_manager.sign_certificate(
+    cert_manager.sign_certificate(
         ca_key=ca1["ca_key"],
         ca_cert=ca1["ca_cert"],
         ca_name="ca1",
@@ -121,7 +120,7 @@ def test_multiple_cas(temp_dir):
         city="San Francisco",
     )
 
-    cert2 = cert_manager.sign_certificate(
+    cert_manager.sign_certificate(
         ca_key=ca2["ca_key"],
         ca_cert=ca2["ca_cert"],
         ca_name="ca2",

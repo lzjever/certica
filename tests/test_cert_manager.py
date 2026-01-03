@@ -2,7 +2,6 @@
 Tests for Certificate Manager
 """
 
-import pytest
 from pathlib import Path
 from certica.ca_manager import CAManager
 from certica.cert_manager import CertManager

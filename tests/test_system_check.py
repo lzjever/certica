@@ -2,7 +2,6 @@
 Tests for System Check
 """
 
-import pytest
 from certica.system_check import SystemChecker, check_system_requirements
 
 

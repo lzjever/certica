@@ -2,7 +2,6 @@
 Tests for main entry point
 """
 
-import pytest
 import sys
 from pathlib import Path
 from unittest.mock import patch

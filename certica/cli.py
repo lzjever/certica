@@ -5,8 +5,7 @@ Command-line interface for CA certificate tool
 import sys
 import click
 from pathlib import Path
-from typing import List, Optional
-from .i18n import set_language, t, get_supported_languages
+from .i18n import set_language, t
 from .system_check import check_system_requirements
 from .ca_manager import CAManager
 from .cert_manager import CertManager

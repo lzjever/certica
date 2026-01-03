@@ -2,13 +2,12 @@
 Interactive UI using questionary and rich libraries for terminal interface
 """
 
-import os
 from pathlib import Path
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich import box
-from typing import List, Optional, Dict
+from typing import Dict
 import questionary
 from .i18n import t
 from .ca_manager import CAManager
@@ -465,10 +464,10 @@ class CAUITool:
         cert_count = len(certs)
 
         warning_msg = f"⚠️  警告: 删除根CA '{ca['name']}' 将同时删除:\n"
-        warning_msg += f"  • CA证书和密钥\n"
+        warning_msg += "  • CA证书和密钥\n"
         if cert_count > 0:
             warning_msg += f"  • {cert_count} 个已签发的证书\n"
-        warning_msg += f"\n此操作不可恢复！"
+        warning_msg += "\n此操作不可恢复！"
 
         self.console.print(
             Panel(warning_msg, border_style="red", title="[bold red]确认删除[/bold red]")
@@ -571,7 +570,7 @@ class CAUITool:
                                 cert_type = "🖥️  服务器"
                         elif "clientauth" in output or "client authentication" in output:
                             cert_type = "👤 客户端"
-                    except:
+                    except Exception:
                         pass
 
                     cert_choices.append(
@@ -654,8 +653,8 @@ class CAUITool:
         self._clear_and_show_header(f"🗑️  删除证书: {cert['name']}")
 
         warning_msg = f"⚠️  警告: 删除证书 '{cert['name']}'\n"
-        warning_msg += f"  • 证书和密钥将被永久删除\n"
-        warning_msg += f"\n此操作不可恢复！"
+        warning_msg += "  • 证书和密钥将被永久删除\n"
+        warning_msg += "\n此操作不可恢复！"
 
         self.console.print(
             Panel(warning_msg, border_style="red", title="[bold red]确认删除[/bold red]")

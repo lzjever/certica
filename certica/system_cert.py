@@ -111,7 +111,7 @@ class SystemCertManager:
         else:
             # Try without password (might work if user has passwordless sudo)
             try:
-                result = subprocess.run(
+                subprocess.run(
                     ["sudo"] + command, check=True, capture_output=True, text=True
                 )
                 return True, ""
@@ -546,7 +546,7 @@ class SystemCertManager:
                 print(t("system.remove.linux.success", method=method_name))
                 return True
 
-            except Exception as e:
+            except Exception:
                 continue
 
         print(t("system.remove.linux.no_method"))

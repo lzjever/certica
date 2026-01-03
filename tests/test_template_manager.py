@@ -2,7 +2,6 @@
 Tests for Template Manager
 """
 
-import pytest
 import json
 from pathlib import Path
 from certica.template_manager import TemplateManager

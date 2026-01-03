@@ -6,8 +6,7 @@ import os
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import List, Optional, Dict
-from datetime import datetime, timedelta
+from typing import List, Dict
 
 
 class CertManager:

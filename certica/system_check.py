@@ -92,7 +92,7 @@ class SystemChecker:
             (is_available, error_message)
         """
         try:
-            result = subprocess.run(command, capture_output=True, text=True, timeout=5)
+            subprocess.run(command, capture_output=True, text=True, timeout=5)
             # Command exists if we can run it (even if it returns non-zero)
             return True, None
         except FileNotFoundError:
