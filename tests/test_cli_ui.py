@@ -24,7 +24,7 @@ class TestCLIUI:
                 mock_instance = MagicMock()
                 mock_instance.run = MagicMock()
                 mock_ui.return_value = mock_instance
-                
+
                 result = cli_runner.invoke(
                     cli,
                     [
@@ -36,7 +36,7 @@ class TestCLIUI:
                         "xx",  # Unsupported language
                     ],
                 )
-                
+
                 # Should warn and fall back to English
                 assert result.exit_code == 0 or "unsupported" in result.output.lower()
 
@@ -47,7 +47,7 @@ class TestCLIUI:
                 mock_instance = MagicMock()
                 mock_instance.run.side_effect = KeyboardInterrupt()
                 mock_ui.return_value = mock_instance
-                
+
                 result = cli_runner.invoke(
                     cli,
                     [
@@ -59,7 +59,7 @@ class TestCLIUI:
                         "en",
                     ],
                 )
-                
+
                 # Should handle KeyboardInterrupt gracefully
                 assert result.exit_code == 0
 
@@ -77,7 +77,6 @@ class TestCLIUI:
                     "en",
                 ],
             )
-            
+
             # Should exit with error
             assert result.exit_code != 0
-

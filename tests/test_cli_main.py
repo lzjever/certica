@@ -5,7 +5,7 @@ Tests for CLI main function
 import pytest
 from click.testing import CliRunner
 from unittest.mock import patch
-from certica.cli import cli, main
+from certica.cli import main
 
 
 @pytest.fixture
@@ -32,4 +32,3 @@ class TestCLIMain:
                 main()
             except SystemExit:
                 pass  # Expected
-

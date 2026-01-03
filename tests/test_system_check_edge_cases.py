@@ -2,9 +2,8 @@
 Edge cases and additional tests for System Check module
 """
 
-import pytest
 import subprocess
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from certica.system_check import SystemChecker, check_system_requirements
 
 
@@ -14,33 +13,33 @@ class TestSystemCheckEdgeCases:
     def test_check_command_timeout(self):
         """Test check_command with timeout"""
         checker = SystemChecker()
-        
+
         with patch("subprocess.run") as mock_run:
             mock_run.side_effect = subprocess.TimeoutExpired("test", 5)
             available, error = checker.check_command(["test", "command"])
-            
+
             assert available is False
             assert "timeout" in error.lower()
 
     def test_check_command_file_not_found(self):
         """Test check_command with FileNotFoundError"""
         checker = SystemChecker()
-        
+
         with patch("subprocess.run") as mock_run:
             mock_run.side_effect = FileNotFoundError()
             available, error = checker.check_command(["nonexistent", "command"])
-            
+
             assert available is False
             assert "not found" in error.lower()
 
     def test_check_command_generic_exception(self):
         """Test check_command with generic exception"""
         checker = SystemChecker()
-        
+
         with patch("subprocess.run") as mock_run:
             mock_run.side_effect = Exception("Generic error")
             available, error = checker.check_command(["test", "command"])
-            
+
             assert available is False
             assert "error" in error.lower()
 
@@ -48,14 +47,14 @@ class TestSystemCheckEdgeCases:
         """Test check_tool with unknown tool name"""
         checker = SystemChecker()
         result = checker.check_tool("unknown_tool_xyz")
-        
+
         assert result["available"] is False
         assert "Unknown tool" in result["error"]
 
     def test_check_tool_command_not_found(self):
         """Test check_tool when command is not found"""
         checker = SystemChecker()
-        
+
         with patch.object(checker, "find_command", return_value=None):
             result = checker.check_tool("openssl")
             # When command is not found, should return available=False
@@ -74,7 +73,7 @@ class TestSystemCheckEdgeCases:
                 "description": "OpenSSL",
             }
         }
-        
+
         # Should return True when all required tools are available
         result = checker.print_check_results(results)
         assert result is True
@@ -91,7 +90,7 @@ class TestSystemCheckEdgeCases:
                 "description": "OpenSSL",
             }
         }
-        
+
         result = checker.print_check_results(results)
         assert result is False
 
@@ -113,7 +112,7 @@ class TestSystemCheckEdgeCases:
                 "description": "update-ca-certificates",
             },
         }
-        
+
         result = checker.print_check_results(results)
         # Should return True if all required tools are available (optional tools don't matter)
         assert result is True
@@ -123,7 +122,7 @@ class TestSystemCheckEdgeCases:
         """Test SystemChecker initialization on macOS"""
         mock_system.return_value = "Darwin"
         checker = SystemChecker()
-        
+
         assert checker.system == "Darwin"
         assert "security" in checker.required_tools or "sudo" in checker.required_tools
 
@@ -132,7 +131,7 @@ class TestSystemCheckEdgeCases:
         """Test SystemChecker initialization on Windows"""
         mock_system.return_value = "Windows"
         checker = SystemChecker()
-        
+
         assert checker.system == "Windows"
         assert "certutil" in checker.required_tools
 
@@ -140,7 +139,7 @@ class TestSystemCheckEdgeCases:
         """Test that check_all returns a dictionary"""
         checker = SystemChecker()
         results = checker.check_all()
-        
+
         assert isinstance(results, dict)
         assert len(results) > 0
 
@@ -162,7 +161,7 @@ class TestSystemCheckEdgeCases:
                 "description": "OpenSSL",
             }
         }
-        
+
         # Should return True when all required tools are available
         result = checker.print_check_results(results)
         assert result is True
@@ -170,10 +169,9 @@ class TestSystemCheckEdgeCases:
     def test_check_tool_with_test_command_failure(self):
         """Test check_tool when test command fails"""
         checker = SystemChecker()
-        
+
         with patch.object(checker, "find_command", return_value="/usr/bin/openssl"):
             with patch.object(checker, "check_command", return_value=(False, "Test failed")):
                 result = checker.check_tool("openssl")
                 assert result["available"] is False
                 assert "Test failed" in result["error"]
-

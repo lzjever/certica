@@ -30,4 +30,3 @@ class TestCLICheckOnly:
             result = cli_runner.invoke(cli, ["--check-only"])
             # Should exit with error code
             assert result.exit_code in [1, 2]
-

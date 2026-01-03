@@ -2,7 +2,6 @@
 Tests for _format_path function edge cases
 """
 
-import pytest
 from certica.cli import _format_path
 
 
@@ -27,4 +26,3 @@ class TestFormatPath:
         # Test case where path_parts has more than 1 but remaining is empty
         result = _format_path("output", "output")
         assert isinstance(result, str)
-

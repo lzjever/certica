@@ -23,7 +23,7 @@ class TestCLISignTemplate:
         # Create CA and template
         ca_manager = CAManager(base_dir=str(temp_dir))
         ca_manager.create_root_ca(ca_name="testca")
-        
+
         template_manager = TemplateManager(base_dir=str(temp_dir))
         template_manager.create_template(
             "testtemplate",
@@ -34,7 +34,7 @@ class TestCLISignTemplate:
             default_validity_days=730,
             default_key_size=4096,
         )
-        
+
         result = cli_runner.invoke(
             cli,
             [
@@ -50,7 +50,6 @@ class TestCLISignTemplate:
                 "testtemplate",
             ],
         )
-        
+
         assert result.exit_code == 0
         assert "signed successfully" in result.output.lower()
-

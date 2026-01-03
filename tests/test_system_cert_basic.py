@@ -2,9 +2,8 @@
 Basic tests for System Cert Manager
 """
 
-import pytest
 import platform
-from unittest.mock import patch, MagicMock, mock_open
+from unittest.mock import patch, mock_open
 from certica.system_cert import SystemCertManager
 
 
@@ -45,9 +44,9 @@ class TestSystemCertManagerBasic:
     def test_detect_linux_distro_with_os_release(self, mock_exists):
         """Test _detect_linux_distro when /etc/os-release exists"""
         mock_exists.return_value = True
-        
+
         # Mock open to return file-like object with os-release content
-        mock_file_content = mock_open(read_data='ID=ubuntu\nID_LIKE=debian\n')
+        mock_file_content = mock_open(read_data="ID=ubuntu\nID_LIKE=debian\n")
         with patch("builtins.open", mock_file_content):
             manager = SystemCertManager()
             if manager.system == "Linux":
@@ -58,7 +57,7 @@ class TestSystemCertManagerBasic:
     def test_detect_linux_distro_without_os_release(self, mock_exists):
         """Test _detect_linux_distro when /etc/os-release doesn't exist"""
         mock_exists.return_value = False
-        
+
         manager = SystemCertManager()
         if manager.system == "Linux":
             distro_info = manager._detect_linux_distro()
@@ -134,4 +133,3 @@ class TestSystemCertManagerBasic:
         manager.sudo_password = "cached"
         password = manager._get_sudo_password()
         assert password == "cached"
-

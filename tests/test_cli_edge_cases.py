@@ -4,7 +4,6 @@ Edge cases and additional tests for CLI module
 
 import pytest
 from click.testing import CliRunner
-from unittest.mock import patch, MagicMock
 from certica.cli import cli, _format_path
 from certica.ca_manager import CAManager
 from certica.cert_manager import CertManager
@@ -37,7 +36,7 @@ class TestCLIEdgeCases:
         test_file = base_dir / "ca" / "test.key"
         test_file.parent.mkdir(parents=True)
         test_file.write_text("test")
-        
+
         result = _format_path(str(test_file), str(base_dir))
         assert "ca/test.key" in result
 
@@ -64,11 +63,11 @@ class TestCLIEdgeCases:
     def test_cli_create_ca_with_template(self, cli_runner, temp_dir):
         """Test create-ca with template"""
         from certica.template_manager import TemplateManager
-        
+
         # Create template first
         template_manager = TemplateManager(base_dir=str(temp_dir))
         template_manager.create_template("testtemplate", organization="Template Org")
-        
+
         result = cli_runner.invoke(
             cli,
             [
@@ -82,7 +81,7 @@ class TestCLIEdgeCases:
                 "testtemplate",
             ],
         )
-        
+
         assert result.exit_code == 0
         assert "created successfully" in result.output.lower()
 
@@ -111,7 +110,7 @@ class TestCLIEdgeCases:
                 "4096",
             ],
         )
-        
+
         assert result.exit_code == 0
         assert "created successfully" in result.output.lower()
 
@@ -120,7 +119,7 @@ class TestCLIEdgeCases:
         # Create CA first
         manager = CAManager(base_dir=str(temp_dir))
         manager.create_root_ca(ca_name="testca")
-        
+
         result = cli_runner.invoke(
             cli,
             [
@@ -158,21 +157,21 @@ class TestCLIEdgeCases:
                 "2048",
             ],
         )
-        
+
         assert result.exit_code == 0
         assert "signed successfully" in result.output.lower()
 
     def test_cli_sign_with_template(self, cli_runner, temp_dir):
         """Test sign command with template"""
         from certica.template_manager import TemplateManager
-        
+
         # Create CA and template
         manager = CAManager(base_dir=str(temp_dir))
         manager.create_root_ca(ca_name="testca")
-        
+
         template_manager = TemplateManager(base_dir=str(temp_dir))
         template_manager.create_template("testtemplate", organization="Template Org")
-        
+
         result = cli_runner.invoke(
             cli,
             [
@@ -188,7 +187,7 @@ class TestCLIEdgeCases:
                 "testtemplate",
             ],
         )
-        
+
         assert result.exit_code == 0
         assert "signed successfully" in result.output.lower()
 
@@ -197,7 +196,7 @@ class TestCLIEdgeCases:
         # Create CA first
         manager = CAManager(base_dir=str(temp_dir))
         manager.create_root_ca(ca_name="testca")
-        
+
         result = cli_runner.invoke(
             cli,
             [
@@ -213,7 +212,7 @@ class TestCLIEdgeCases:
                 "client",
             ],
         )
-        
+
         assert result.exit_code == 0
         assert "signed successfully" in result.output.lower()
 
@@ -222,7 +221,7 @@ class TestCLIEdgeCases:
         # Create CA and certificate
         ca_manager = CAManager(base_dir=str(temp_dir))
         ca_result = ca_manager.create_root_ca(ca_name="testca")
-        
+
         cert_manager = CertManager(base_dir=str(temp_dir))
         cert_manager.sign_certificate(
             ca_key=ca_result["ca_key"],
@@ -233,7 +232,7 @@ class TestCLIEdgeCases:
             common_name="test.example.com",
             organization="Test Org",
         )
-        
+
         result = cli_runner.invoke(
             cli,
             [
@@ -245,7 +244,7 @@ class TestCLIEdgeCases:
                 "testca",
             ],
         )
-        
+
         assert result.exit_code == 0
         assert "testcert" in result.output
 
@@ -260,7 +259,7 @@ class TestCLIEdgeCases:
                 "list-certs",
             ],
         )
-        
+
         assert result.exit_code == 0
         assert "No certificates found" in result.output
 
@@ -269,7 +268,7 @@ class TestCLIEdgeCases:
         # Create CA but no certificates
         manager = CAManager(base_dir=str(temp_dir))
         manager.create_root_ca(ca_name="testca")
-        
+
         result = cli_runner.invoke(
             cli,
             [
@@ -281,7 +280,7 @@ class TestCLIEdgeCases:
                 "testca",
             ],
         )
-        
+
         assert result.exit_code == 0
         assert "No certificates found" in result.output
 
@@ -298,7 +297,7 @@ class TestCLIEdgeCases:
                 "nonexistent",
             ],
         )
-        
+
         # Should output error message (exit code may be 0 as click doesn't always exit on error)
         assert "not found" in result.output.lower()
 
@@ -307,7 +306,7 @@ class TestCLIEdgeCases:
         # Create CA and certificate
         ca_manager = CAManager(base_dir=str(temp_dir))
         ca_result = ca_manager.create_root_ca(ca_name="testca")
-        
+
         result = cli_runner.invoke(
             cli,
             [
@@ -319,7 +318,7 @@ class TestCLIEdgeCases:
                 ca_result["ca_cert"],
             ],
         )
-        
+
         assert result.exit_code == 0
         assert "Certificate" in result.output or "Subject" in result.output
 
@@ -327,7 +326,7 @@ class TestCLIEdgeCases:
         """Test info command with invalid certificate"""
         invalid_cert = temp_dir / "invalid.cert"
         invalid_cert.write_text("not a certificate")
-        
+
         result = cli_runner.invoke(
             cli,
             [
@@ -339,7 +338,7 @@ class TestCLIEdgeCases:
                 str(invalid_cert),
             ],
         )
-        
+
         assert result.exit_code == 0
         assert "Failed" in result.output or "error" in result.output.lower()
 
@@ -358,7 +357,7 @@ class TestCLIEdgeCases:
             ],
         )
         assert result1.exit_code == 0
-        
+
         # Try to create duplicate
         result2 = cli_runner.invoke(
             cli,
@@ -371,7 +370,7 @@ class TestCLIEdgeCases:
                 "testca",
             ],
         )
-        
+
         # Should output error message about duplicate
         assert "already exists" in result2.output.lower()
 
@@ -390,7 +389,7 @@ class TestCLIEdgeCases:
                 "testcert",
             ],
         )
-        
+
         # Should output error message about CA not found
         assert "not found" in result.output.lower()
 
@@ -419,7 +418,7 @@ class TestCLIEdgeCases:
                 "2048",
             ],
         )
-        
+
         assert result.exit_code == 0
         assert "created" in result.output.lower()
 
@@ -434,7 +433,6 @@ class TestCLIEdgeCases:
                 "list-templates",
             ],
         )
-        
+
         assert result.exit_code == 0
         assert "No templates found" in result.output
-

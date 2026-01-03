@@ -23,7 +23,7 @@ class TestCLIExceptions:
         # Create CA first
         manager = CAManager(base_dir=str(temp_dir))
         manager.create_root_ca(ca_name="testca")
-        
+
         result = cli_runner.invoke(
             cli,
             [
@@ -35,7 +35,7 @@ class TestCLIExceptions:
                 "testca",
             ],
         )
-        
+
         assert "error" in result.output.lower() or "already exists" in result.output.lower()
 
     def test_cli_create_ca_generic_exception(self, cli_runner, temp_dir, monkeypatch):
@@ -45,7 +45,7 @@ class TestCLIExceptions:
             mock_instance = MagicMock()
             mock_instance.create_root_ca.side_effect = Exception("Test error")
             mock_ca_manager.return_value = mock_instance
-            
+
             result = cli_runner.invoke(
                 cli,
                 [
@@ -57,7 +57,7 @@ class TestCLIExceptions:
                     "testca",
                 ],
             )
-            
+
             assert "error" in result.output.lower() or "failed" in result.output.lower()
 
     def test_cli_sign_exception_handling(self, cli_runner, temp_dir, monkeypatch):
@@ -65,13 +65,13 @@ class TestCLIExceptions:
         # Create CA first
         manager = CAManager(base_dir=str(temp_dir))
         manager.create_root_ca(ca_name="testca")
-        
+
         # Mock sign_certificate to raise exception
         with patch("certica.cli.CertManager") as mock_cert_manager:
             mock_instance = MagicMock()
             mock_instance.sign_certificate.side_effect = Exception("Sign error")
             mock_cert_manager.return_value = mock_instance
-            
+
             result = cli_runner.invoke(
                 cli,
                 [
@@ -85,7 +85,7 @@ class TestCLIExceptions:
                     "testcert",
                 ],
             )
-            
+
             assert "error" in result.output.lower() or "failed" in result.output.lower()
 
     def test_cli_install_password_prompt_empty(self, cli_runner, temp_dir):
@@ -93,7 +93,7 @@ class TestCLIExceptions:
         # Create CA first
         manager = CAManager(base_dir=str(temp_dir))
         manager.create_root_ca(ca_name="testca")
-        
+
         # Mock click.prompt to return empty string
         with patch("click.prompt", return_value=""):
             result = cli_runner.invoke(
@@ -108,7 +108,7 @@ class TestCLIExceptions:
                 ],
                 input="\n",  # Empty input
             )
-            
+
             assert "password" in result.output.lower() or "required" in result.output.lower()
 
     def test_cli_remove_password_prompt_empty(self, cli_runner, temp_dir):
@@ -127,6 +127,5 @@ class TestCLIExceptions:
                 ],
                 input="\n",  # Empty input
             )
-            
-            assert "password" in result.output.lower() or "required" in result.output.lower()
 
+            assert "password" in result.output.lower() or "required" in result.output.lower()

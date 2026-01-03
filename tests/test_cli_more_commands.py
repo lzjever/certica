@@ -33,7 +33,7 @@ class TestCLIMoreCommands:
                 "testpass",
             ],
         )
-        
+
         assert "not found" in result.output.lower()
 
     def test_cli_install_command_with_password(self, cli_runner, temp_dir):
@@ -41,13 +41,13 @@ class TestCLIMoreCommands:
         # Create CA first
         manager = CAManager(base_dir=str(temp_dir))
         manager.create_root_ca(ca_name="testca")
-        
+
         # Mock system_cert_manager to avoid actual system installation
         with patch("certica.cli.SystemCertManager") as mock_system_cert:
             mock_instance = MagicMock()
             mock_instance.install_ca_cert.return_value = True
             mock_system_cert.return_value = mock_instance
-            
+
             result = cli_runner.invoke(
                 cli,
                 [
@@ -61,22 +61,26 @@ class TestCLIMoreCommands:
                     "testpass",
                 ],
             )
-            
+
             # Should attempt installation
-            assert result.exit_code == 0 or "success" in result.output.lower() or "error" in result.output.lower()
+            assert (
+                result.exit_code == 0
+                or "success" in result.output.lower()
+                or "error" in result.output.lower()
+            )
 
     def test_cli_install_command_failure(self, cli_runner, temp_dir):
         """Test install command when installation fails"""
         # Create CA first
         manager = CAManager(base_dir=str(temp_dir))
         manager.create_root_ca(ca_name="testca")
-        
+
         # Mock system_cert_manager to return failure
         with patch("certica.cli.SystemCertManager") as mock_system_cert:
             mock_instance = MagicMock()
             mock_instance.install_ca_cert.return_value = False
             mock_system_cert.return_value = mock_instance
-            
+
             result = cli_runner.invoke(
                 cli,
                 [
@@ -90,7 +94,7 @@ class TestCLIMoreCommands:
                     "testpass",
                 ],
             )
-            
+
             # Should show error
             assert "error" in result.output.lower() or "failed" in result.output.lower()
 
@@ -101,7 +105,7 @@ class TestCLIMoreCommands:
             mock_instance = MagicMock()
             mock_instance.remove_ca_cert.return_value = True
             mock_system_cert.return_value = mock_instance
-            
+
             result = cli_runner.invoke(
                 cli,
                 [
@@ -115,9 +119,13 @@ class TestCLIMoreCommands:
                     "testpass",
                 ],
             )
-            
+
             # Should attempt removal
-            assert result.exit_code == 0 or "success" in result.output.lower() or "error" in result.output.lower()
+            assert (
+                result.exit_code == 0
+                or "success" in result.output.lower()
+                or "error" in result.output.lower()
+            )
 
     def test_cli_remove_command_failure(self, cli_runner, temp_dir):
         """Test remove command when removal fails"""
@@ -126,7 +134,7 @@ class TestCLIMoreCommands:
             mock_instance = MagicMock()
             mock_instance.remove_ca_cert.return_value = False
             mock_system_cert.return_value = mock_instance
-            
+
             result = cli_runner.invoke(
                 cli,
                 [
@@ -140,7 +148,7 @@ class TestCLIMoreCommands:
                     "testpass",
                 ],
             )
-            
+
             # Should show error
             assert "error" in result.output.lower() or "failed" in result.output.lower()
 
@@ -155,20 +163,19 @@ class TestCLIMoreCommands:
                     "list-cas",
                 ],
             )
-            
+
             assert result.exit_code != 0
             assert "system" in result.output.lower() or "check" in result.output.lower()
 
     def test_cli_format_path_edge_cases(self):
         """Test _format_path with various edge cases"""
         from certica.cli import _format_path
-        
+
         # Test with None-like values
         result = _format_path("test/path", None)
         assert isinstance(result, str)
-        
+
         # Test with very long path
         long_path = "output/" + "/".join(["dir"] * 100) + "/file.key"
         result = _format_path(long_path, "output")
         assert isinstance(result, str)
-

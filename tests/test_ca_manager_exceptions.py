@@ -4,8 +4,7 @@ Exception handling tests for CA Manager
 
 import pytest
 import subprocess
-from unittest.mock import patch, MagicMock
-from pathlib import Path
+from unittest.mock import patch
 from certica.ca_manager import CAManager
 
 
@@ -16,20 +15,20 @@ class TestCAManagerExceptions:
         """Test that KeyboardInterrupt during CA creation cleans up files"""
         manager = CAManager(base_dir=str(temp_dir))
         ca_subdir = manager.ca_dir / "test-ca"
-        
+
         # Mock subprocess to raise KeyboardInterrupt after key generation
         original_run = subprocess.run
         call_count = [0]
-        
+
         def mock_run(cmd, **kwargs):
             call_count[0] += 1
             if call_count[0] == 1:  # First call (genrsa) succeeds
                 return original_run(cmd, **kwargs)
             else:  # Second call (req) raises KeyboardInterrupt
                 raise KeyboardInterrupt()
-        
+
         monkeypatch.setattr("subprocess.run", mock_run)
-        
+
         with pytest.raises(KeyboardInterrupt):
             manager.create_root_ca(
                 ca_name="test-ca",
@@ -38,9 +37,9 @@ class TestCAManagerExceptions:
                 state="CA",
                 city="SF",
                 validity_days=365,
-                key_size=2048
+                key_size=2048,
             )
-        
+
         # Verify cleanup
         key_path = ca_subdir / "test-ca.key.pem"
         cert_path = ca_subdir / "test-ca.cert.pem"
@@ -51,20 +50,20 @@ class TestCAManagerExceptions:
         """Test that generic exception during CA creation cleans up files"""
         manager = CAManager(base_dir=str(temp_dir))
         ca_subdir = manager.ca_dir / "test-ca"
-        
+
         # Mock subprocess to raise exception after key generation
         original_run = subprocess.run
         call_count = [0]
-        
+
         def mock_run(cmd, **kwargs):
             call_count[0] += 1
             if call_count[0] == 1:  # First call (genrsa) succeeds
                 return original_run(cmd, **kwargs)
             else:  # Second call (req) raises exception
                 raise Exception("Test exception")
-        
+
         monkeypatch.setattr("subprocess.run", mock_run)
-        
+
         with pytest.raises(Exception):
             manager.create_root_ca(
                 ca_name="test-ca",
@@ -73,9 +72,9 @@ class TestCAManagerExceptions:
                 state="CA",
                 city="SF",
                 validity_days=365,
-                key_size=2048
+                key_size=2048,
             )
-        
+
         # Verify cleanup
         key_path = ca_subdir / "test-ca.key.pem"
         cert_path = ca_subdir / "test-ca.cert.pem"
@@ -87,7 +86,7 @@ class TestCAManagerExceptions:
         manager = CAManager(base_dir=str(temp_dir))
         invalid_cert = temp_dir / "invalid.cert.pem"
         invalid_cert.write_text("not a valid certificate")
-        
+
         result = manager.get_ca_info(str(invalid_cert))
         assert "Failed to read certificate" in result["info"]
 
@@ -95,7 +94,7 @@ class TestCAManagerExceptions:
         """Test delete_ca exception handling"""
         manager = CAManager(base_dir=str(temp_dir))
         manager.create_root_ca(ca_name="test-ca", organization="Test")
-        
+
         # Mock shutil.rmtree to raise exception
         with patch("shutil.rmtree", side_effect=Exception("Delete failed")):
             result = manager.delete_ca("test-ca")
@@ -107,4 +106,3 @@ class TestCAManagerExceptions:
         cas = manager.list_cas()
         assert isinstance(cas, list)
         assert len(cas) == 0
-

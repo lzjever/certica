@@ -2,7 +2,6 @@
 More tests for _format_path to cover remaining lines
 """
 
-import pytest
 from certica.cli import _format_path
 
 
@@ -17,7 +16,7 @@ class TestFormatPathMore:
         other_path = tmp_path / "other" / "file.key"
         other_path.parent.mkdir()
         other_path.write_text("test")
-        
+
         # These paths are not related, should cause ValueError
         result = _format_path(str(other_path), str(base_path))
         # Should handle ValueError and try alternative method
@@ -29,4 +28,3 @@ class TestFormatPathMore:
         result = _format_path("output", "output")
         # When remaining is empty, should return original path
         assert result == "output" or isinstance(result, str)
-

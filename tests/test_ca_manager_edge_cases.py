@@ -3,9 +3,6 @@ Edge cases and boundary condition tests for CA Manager
 """
 
 import pytest
-import tempfile
-import shutil
-from pathlib import Path
 from certica.ca_manager import CAManager
 
 
@@ -17,11 +14,11 @@ class TestCAManagerEdgeCases:
         manager = CAManager(base_dir=str(temp_dir))
         ca_subdir = manager.ca_dir / "test-ca"
         ca_subdir.mkdir(parents=True, exist_ok=True)
-        
+
         # Create only key file (simulating interrupted creation)
         key_path = ca_subdir / "test-ca.key.pem"
         key_path.write_text("fake key content")
-        
+
         # Should clean up and create successfully
         result = manager.create_root_ca(
             ca_name="test-ca",
@@ -30,9 +27,9 @@ class TestCAManagerEdgeCases:
             state="CA",
             city="SF",
             validity_days=365,
-            key_size=2048
+            key_size=2048,
         )
-        
+
         assert result["ca_name"] == "test-ca"
         assert key_path.exists()
         assert (ca_subdir / "test-ca.cert.pem").exists()
@@ -42,11 +39,11 @@ class TestCAManagerEdgeCases:
         manager = CAManager(base_dir=str(temp_dir))
         ca_subdir = manager.ca_dir / "test-ca"
         ca_subdir.mkdir(parents=True, exist_ok=True)
-        
+
         # Create only cert file (simulating interrupted creation)
         cert_path = ca_subdir / "test-ca.cert.pem"
         cert_path.write_text("fake cert content")
-        
+
         # Should clean up and create successfully
         result = manager.create_root_ca(
             ca_name="test-ca",
@@ -55,9 +52,9 @@ class TestCAManagerEdgeCases:
             state="CA",
             city="SF",
             validity_days=365,
-            key_size=2048
+            key_size=2048,
         )
-        
+
         assert result["ca_name"] == "test-ca"
         assert (ca_subdir / "test-ca.key.pem").exists()
         assert cert_path.exists()
@@ -65,15 +62,15 @@ class TestCAManagerEdgeCases:
     def test_list_cas_with_incomplete_ca(self, temp_dir):
         """Test listing CAs when some directories have incomplete files"""
         manager = CAManager(base_dir=str(temp_dir))
-        
+
         # Create complete CA
         manager.create_root_ca(ca_name="complete-ca", organization="Test")
-        
+
         # Create incomplete CA (only key)
         incomplete_dir = manager.ca_dir / "incomplete-ca"
         incomplete_dir.mkdir(parents=True, exist_ok=True)
         (incomplete_dir / "incomplete-ca.key.pem").write_text("fake")
-        
+
         # Should only list complete CA
         cas = manager.list_cas()
         assert len(cas) == 1
@@ -91,7 +88,7 @@ class TestCAManagerEdgeCases:
         ca_subdir = manager.ca_dir / "incomplete-ca"
         ca_subdir.mkdir(parents=True, exist_ok=True)
         (ca_subdir / "incomplete-ca.key.pem").write_text("fake")
-        
+
         result = manager.get_ca("incomplete-ca")
         assert result is None
 
@@ -119,7 +116,7 @@ class TestCAManagerEdgeCases:
         manager = CAManager(base_dir=str(temp_dir))
         invalid_cert = temp_dir / "invalid.cert.pem"
         invalid_cert.write_text("not a valid certificate")
-        
+
         result = manager.get_ca_info(str(invalid_cert))
         assert "Failed to read certificate" in result["info"]
 
@@ -127,20 +124,20 @@ class TestCAManagerEdgeCases:
         """Test that partial files are cleaned up when creation fails"""
         manager = CAManager(base_dir=str(temp_dir))
         ca_subdir = manager.ca_dir / "test-ca"
-        
+
         # Mock subprocess to fail after key generation
         original_run = __import__("subprocess").run
         call_count = [0]
-        
+
         def mock_run(cmd, **kwargs):
             call_count[0] += 1
             if call_count[0] == 1:  # First call (genrsa) succeeds
                 return original_run(cmd, **kwargs)
             else:  # Second call (req) fails
                 raise __import__("subprocess").CalledProcessError(1, cmd)
-        
+
         monkeypatch.setattr("subprocess.run", mock_run)
-        
+
         with pytest.raises(Exception):
             manager.create_root_ca(
                 ca_name="test-ca",
@@ -149,9 +146,9 @@ class TestCAManagerEdgeCases:
                 state="CA",
                 city="SF",
                 validity_days=365,
-                key_size=2048
+                key_size=2048,
             )
-        
+
         # Verify cleanup
         key_path = ca_subdir / "test-ca.key.pem"
         cert_path = ca_subdir / "test-ca.cert.pem"
@@ -161,13 +158,13 @@ class TestCAManagerEdgeCases:
     def test_list_cas_with_non_directory_files(self, temp_dir):
         """Test listing CAs when ca_dir contains non-directory files"""
         manager = CAManager(base_dir=str(temp_dir))
-        
+
         # Create a file (not directory) in ca_dir
         (manager.ca_dir / "not-a-dir.txt").write_text("test")
-        
+
         # Create a valid CA
         manager.create_root_ca(ca_name="valid-ca", organization="Test")
-        
+
         # Should only list valid CA, ignore the file
         cas = manager.list_cas()
         assert len(cas) == 1
@@ -177,13 +174,12 @@ class TestCAManagerEdgeCases:
         """Test getting certificates when some cert directories are incomplete"""
         manager = CAManager(base_dir=str(temp_dir))
         manager.create_root_ca(ca_name="test-ca", organization="Test")
-        
+
         # Create incomplete cert directory (only key)
         cert_dir = manager.certs_dir / "test-ca" / "incomplete-cert"
         cert_dir.mkdir(parents=True, exist_ok=True)
         (cert_dir / "key.pem").write_text("fake key")
-        
+
         # Should not list incomplete cert
         certs = manager.get_certs_by_ca("test-ca")
         assert len(certs) == 0
-

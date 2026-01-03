@@ -30,7 +30,7 @@ class TestCLICreateCATemplate:
             default_validity_days=730,
             default_key_size=4096,
         )
-        
+
         result = cli_runner.invoke(
             cli,
             [
@@ -44,13 +44,13 @@ class TestCLICreateCATemplate:
                 "testtemplate",
             ],
         )
-        
+
         assert result.exit_code == 0
         assert "created successfully" in result.output.lower()
-        
+
         # Verify CA was created with template values
         from certica.ca_manager import CAManager
+
         manager = CAManager(base_dir=str(temp_dir))
         ca = manager.get_ca("testca")
         assert ca is not None
-

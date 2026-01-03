@@ -2,18 +2,13 @@
 Edge cases and additional tests for i18n module
 """
 
-import pytest
-import json
-import tempfile
-from pathlib import Path
-from unittest.mock import patch, mock_open
+from unittest.mock import patch
 from certica.i18n import (
     set_language,
     get_language,
     t,
     _load_translations,
-    SUPPORTED_LANGUAGES,
-    DEFAULT_LANGUAGE,
+    SUPPORTED_LANGUAGES
 )
 
 
@@ -30,7 +25,7 @@ class TestI18nEdgeCases:
         # Create a temporary locale file with invalid JSON
         locale_file = tmp_path / "invalid.json"
         locale_file.write_text("{ invalid json }")
-        
+
         # Mock the locale directory
         with patch("certica.i18n.Path") as mock_path:
             mock_path.return_value.parent = tmp_path
@@ -42,10 +37,10 @@ class TestI18nEdgeCases:
         """Test setting language with locale code (e.g., zh-CN -> zh)"""
         set_language("zh-CN")
         assert get_language() == "zh"
-        
+
         set_language("en-US")
         assert get_language() == "en"
-        
+
         set_language("fr-FR")
         assert get_language() == "fr"
 
@@ -53,7 +48,7 @@ class TestI18nEdgeCases:
         """Test that language codes are case insensitive"""
         set_language("ZH")
         assert get_language() == "zh"
-        
+
         set_language("EN")
         assert get_language() == "en"
 
@@ -100,9 +95,10 @@ class TestI18nEdgeCases:
         set_language("en")
         # Clear translations to simulate not loaded
         from certica.i18n import _translations
+
         original = _translations.copy()
         _translations.clear()
-        
+
         try:
             result = t("ui.menu.title")
             # Should return the key since no translations loaded
@@ -144,4 +140,3 @@ class TestI18nEdgeCases:
         set_language("en")
         result = t("ui.create_ca.error_exists", error="Test error message")
         assert "error" in result.lower() or "Test error message" in result
-

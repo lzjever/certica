@@ -24,7 +24,7 @@ class TestCLIUIMore:
                 mock_instance = MagicMock()
                 mock_instance.run = MagicMock()
                 mock_ui.return_value = mock_instance
-                
+
                 result = cli_runner.invoke(
                     cli,
                     [
@@ -36,8 +36,7 @@ class TestCLIUIMore:
                         "en",
                     ],
                 )
-                
+
                 # Should launch UI
                 assert result.exit_code == 0
                 mock_instance.run.assert_called_once()
-
