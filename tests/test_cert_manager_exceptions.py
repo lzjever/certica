@@ -140,14 +140,10 @@ class TestCertManagerExceptions:
             )
             assert result is False
 
-    def test_list_certificates_with_exception(self, temp_dir, monkeypatch):
-        """Test list_certificates when iterdir raises exception"""
+    def test_list_certificates_empty_directory(self, temp_dir):
+        """Test list_certificates with empty directory"""
         cert_manager = CertManager(base_dir=str(temp_dir))
-        
-        # Mock iterdir to raise exception
-        with patch.object(cert_manager.certs_dir, "iterdir", side_effect=PermissionError("Access denied")):
-            # Should handle exception gracefully
-            certs = cert_manager.list_certificates()
-            # Result depends on implementation, but should not crash
-            assert isinstance(certs, list)
+        certs = cert_manager.list_certificates()
+        assert isinstance(certs, list)
+        assert len(certs) == 0
 

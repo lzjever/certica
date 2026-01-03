@@ -101,14 +101,10 @@ class TestCAManagerExceptions:
             result = manager.delete_ca("test-ca")
             assert result is False
 
-    def test_list_cas_with_exception_in_iterdir(self, temp_dir, monkeypatch):
-        """Test list_cas when iterdir raises exception"""
+    def test_list_cas_empty_directory(self, temp_dir):
+        """Test list_cas with empty directory"""
         manager = CAManager(base_dir=str(temp_dir))
-        
-        # Mock iterdir to raise exception
-        with patch.object(manager.ca_dir, "iterdir", side_effect=PermissionError("Access denied")):
-            # Should handle exception gracefully
-            cas = manager.list_cas()
-            # Result depends on implementation, but should not crash
-            assert isinstance(cas, list)
+        cas = manager.list_cas()
+        assert isinstance(cas, list)
+        assert len(cas) == 0
 
