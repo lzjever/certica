@@ -15,6 +15,9 @@
   "ui.notice": "ℹ️  Avis",
   "cli.description": "Outil de génération de certificat CA - Interface en ligne de commande",
   "main.exiting": "Sortie en cours...",
-  "lang.unsupported": "Avertissement: La langue '{lang}' n'est pas prise en charge. Utilisation de l'anglais à la place."
+  "lang.unsupported": "Avertissement: La langue '{lang}' n'est pas prise en charge. Utilisation de l'anglais à la place.",
+  "ui.instruction.arrow_keys": "Utilisez les flèches",
+  "ui.instruction.enter_select": "Appuyez sur Entrée pour sélectionner",
+  "ui.instruction.ctrl_c": "💡 Astuce: Appuyez sur Ctrl+C à tout moment pour annuler et revenir au menu précédent"
 }
 

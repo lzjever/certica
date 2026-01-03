@@ -15,6 +15,9 @@
   "ui.notice": "ℹ️  通知",
   "cli.description": "CA証明書生成ツール - コマンドラインインターフェース",
   "main.exiting": "終了中...",
-  "lang.unsupported": "警告: 言語 '{lang}' はサポートされていません。代わりに英語を使用します。"
+  "lang.unsupported": "警告: 言語 '{lang}' はサポートされていません。代わりに英語を使用します。",
+  "ui.instruction.arrow_keys": "矢印キーを使用",
+  "ui.instruction.enter_select": "Enterキーを押して選択",
+  "ui.instruction.ctrl_c": "💡 ヒント: いつでもCtrl+Cを押すとキャンセルして前のメニューに戻ります"
 }
 
