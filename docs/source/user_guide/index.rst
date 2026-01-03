@@ -8,6 +8,9 @@ Comprehensive guide to using Certica.
 
    installation
    usage
+   cli_reference
+   python_api
+   best_practices
    language_support
    certificate_usage
 

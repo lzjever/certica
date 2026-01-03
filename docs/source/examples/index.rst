@@ -8,4 +8,6 @@ Real-world usage examples for Certica.
 
    nginx_example
    etcd_example
+   docker_example
+   automation_example
 
