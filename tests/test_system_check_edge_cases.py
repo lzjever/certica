@@ -58,8 +58,10 @@ class TestSystemCheckEdgeCases:
         
         with patch.object(checker, "find_command", return_value=None):
             result = checker.check_tool("openssl")
-            # Result depends on whether openssl is actually available
+            # When command is not found, should return available=False
             assert "available" in result
+            assert result["available"] is False
+            assert "not found" in result["error"].lower()
 
     def test_print_check_results_with_results(self):
         """Test print_check_results with provided results"""
@@ -73,9 +75,9 @@ class TestSystemCheckEdgeCases:
             }
         }
         
-        # Should not crash
+        # Should return True when all required tools are available
         result = checker.print_check_results(results)
-        assert isinstance(result, bool)
+        assert result is True
 
     def test_print_check_results_with_missing_required(self):
         """Test print_check_results when required tools are missing"""
@@ -113,8 +115,8 @@ class TestSystemCheckEdgeCases:
         }
         
         result = checker.print_check_results(results)
-        # Should return True if required tools are available
-        assert isinstance(result, bool)
+        # Should return True if all required tools are available (optional tools don't matter)
+        assert result is True
 
     @patch("platform.system")
     def test_system_checker_init_darwin(self, mock_system):
@@ -146,7 +148,8 @@ class TestSystemCheckEdgeCases:
         """Test check_system_requirements convenience function"""
         # This will print to stdout, but should return a boolean
         result = check_system_requirements()
-        assert isinstance(result, bool)
+        # Should return True if all required tools are available, False otherwise
+        assert result is True or result is False
 
     def test_print_check_results_no_optional_tools(self):
         """Test print_check_results when there are no optional tools"""
@@ -160,9 +163,9 @@ class TestSystemCheckEdgeCases:
             }
         }
         
-        # Should not crash when no optional tools
+        # Should return True when all required tools are available
         result = checker.print_check_results(results)
-        assert isinstance(result, bool)
+        assert result is True
 
     def test_check_tool_with_test_command_failure(self):
         """Test check_tool when test command fails"""

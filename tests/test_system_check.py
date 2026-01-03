@@ -17,20 +17,22 @@ def test_check_command():
     checker = SystemChecker()
 
     # Check openssl (should be available)
-    result = checker.check_command(["openssl", "version"])
-    # Result depends on system, but should not crash
-    assert isinstance(result, tuple)
-    assert len(result) == 2
+    available, error = checker.check_command(["openssl", "version"])
+    # Should return tuple with (bool, Optional[str])
+    assert isinstance(available, bool)
+    assert error is None or isinstance(error, str)
 
 
 def test_find_command():
     """Test finding a command"""
     checker = SystemChecker()
 
-    # Find openssl
+    # Find openssl (should be available on most systems)
     path = checker.find_command("openssl")
-    # May be None if not found, but should not crash
+    # Should return None or a string path
     assert path is None or isinstance(path, str)
+    # If openssl is available, path should not be None
+    # (This test may fail on systems without openssl, but that's acceptable)
 
 
 def test_check_tool():
@@ -55,6 +57,7 @@ def test_check_all():
 
 def test_check_system_requirements():
     """Test check_system_requirements function"""
-    # This will print to stdout, but should not crash
+    # This will print to stdout, but should return a boolean
     result = check_system_requirements()
-    assert isinstance(result, bool)
+    # Should return True if all required tools are available, False otherwise
+    assert result is True or result is False

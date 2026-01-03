@@ -427,9 +427,10 @@ class SystemCertManager:
                     print(t("system.install.linux.success", method=method_name))
                     return True
                 else:
-                    print(t("system.install.linux.warning", method=method_name))
-                    # Don't return False here, as the file is installed, just verification failed
-                    return True
+                    print(t("system.install.linux.verification_failed", method=method_name))
+                    # Verification failed - clean up the installed file and return False
+                    self._run_sudo_command(["rm", str(target_path)], password)
+                    return False
 
             except Exception as e:
                 print(t("system.install.linux.error", method=method_name, error=str(e)))
@@ -541,8 +542,13 @@ class SystemCertManager:
                     print(t("system.remove.linux.update_failed", method=method_name, error=error))
                     continue
 
-                print(t("system.remove.linux.success", method=method_name))
-                return True
+                # Verify removal
+                if self._verify_removal(ca_name):
+                    print(t("system.remove.linux.success", method=method_name))
+                    return True
+                else:
+                    print(t("system.remove.linux.verification_failed", method=method_name))
+                    return False
 
             except Exception:
                 continue

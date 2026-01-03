@@ -299,8 +299,8 @@ class TestCLIEdgeCases:
             ],
         )
         
-        # May return 0 with error message or non-zero exit code
-        assert "not found" in result.output.lower() or result.exit_code != 0
+        # Should output error message (exit code may be 0 as click doesn't always exit on error)
+        assert "not found" in result.output.lower()
 
     def test_cli_info_command(self, cli_runner, temp_dir):
         """Test info command"""
@@ -372,8 +372,8 @@ class TestCLIEdgeCases:
             ],
         )
         
-        # May return 0 with error message or non-zero exit code
-        assert "already exists" in result2.output.lower() or result2.exit_code != 0
+        # Should output error message about duplicate
+        assert "already exists" in result2.output.lower()
 
     def test_cli_sign_ca_not_found(self, cli_runner, temp_dir):
         """Test sign command with non-existent CA"""
@@ -391,8 +391,8 @@ class TestCLIEdgeCases:
             ],
         )
         
-        # May return 0 with error message or non-zero exit code
-        assert "not found" in result.output.lower() or result.exit_code != 0
+        # Should output error message about CA not found
+        assert "not found" in result.output.lower()
 
     def test_cli_create_template_with_all_options(self, cli_runner, temp_dir):
         """Test create-template with all options"""
