@@ -111,9 +111,7 @@ class SystemCertManager:
         else:
             # Try without password (might work if user has passwordless sudo)
             try:
-                subprocess.run(
-                    ["sudo"] + command, check=True, capture_output=True, text=True
-                )
+                subprocess.run(["sudo"] + command, check=True, capture_output=True, text=True)
                 return True, ""
             except subprocess.CalledProcessError as e:
                 error_msg = e.stderr.strip() if e.stderr else str(e)
