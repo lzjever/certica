@@ -3,6 +3,8 @@
 [![PyPI version](https://img.shields.io/pypi/v/certica.svg)](https://pypi.org/project/certica/)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![CI](https://github.com/lzjever/certica/workflows/CI/badge.svg)](https://github.com/lzjever/certica/actions)
+[![codecov](https://codecov.io/gh/lzjever/certica/branch/main/graph/badge.svg)](https://codecov.io/gh/lzjever/certica)
 
 **Certica** is a user-friendly CA certificate generation tool for local development and testing with multi-language support.
 
