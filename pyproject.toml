@@ -7,7 +7,7 @@ name = "certica"
 dynamic = ["version"]
 description = "A user-friendly CA certificate generation tool for local development and testing with multi-language support"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.8,<3.15"
 license = {text = "MIT"}
 authors = [
     {name = "Metarigin", email = "dev@metarigin.com"}
@@ -23,6 +23,8 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Security :: Cryptography",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: System :: Systems Administration",
