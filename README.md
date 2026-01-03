@@ -23,13 +23,71 @@
 
 ## 📦 Installation
 
-### Quick Install
+### For End Users
+
+#### Option 1: Install with pip (Standard Method)
 
 ```bash
 pip install certica
 ```
 
-### Development Setup with uv (Recommended)
+#### Option 2: Install with uv (Fast and Recommended)
+
+[uv](https://github.com/astral-sh/uv) is a fast Python package installer. First, install uv:
+
+```bash
+# Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Then install certica from PyPI:
+
+```bash
+# Install certica using uv
+uv pip install certica
+```
+
+Or if you prefer to use uv in a virtual environment:
+
+```bash
+# Create a virtual environment
+uv venv
+
+# Activate the virtual environment
+# On Linux/macOS:
+source .venv/bin/activate
+# On Windows:
+.venv\Scripts\activate
+
+# Install certica
+uv pip install certica
+```
+
+#### Verify Installation
+
+After installation, verify that certica is installed correctly:
+
+```bash
+certica --help
+```
+
+You should see the help message with available commands.
+
+#### Quick Start After Installation
+
+Once installed, you can immediately start using certica:
+
+```bash
+# Launch interactive UI (recommended for beginners)
+certica ui
+
+# Or use command line mode
+certica create-ca --name myca
+```
+
+### For Developers
+
+#### Development Setup with uv (Recommended)
 
 This project uses [uv](https://github.com/astral-sh/uv) for fast dependency management. Install uv first:
 
