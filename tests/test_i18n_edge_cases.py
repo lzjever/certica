@@ -3,13 +3,7 @@ Edge cases and additional tests for i18n module
 """
 
 from unittest.mock import patch
-from certica.i18n import (
-    set_language,
-    get_language,
-    t,
-    _load_translations,
-    SUPPORTED_LANGUAGES
-)
+from certica.i18n import set_language, get_language, t, _load_translations, SUPPORTED_LANGUAGES
 
 
 class TestI18nEdgeCases:
